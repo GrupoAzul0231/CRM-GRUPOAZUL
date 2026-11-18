@@ -3,161 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM - Grupo Azul</title>
+    <title>CRM Corporativo - Grupo Azul</title>
     <!-- Librería oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        /* Estructura general para evitar desbordamientos */
-        html, body { width: 100%; height: 100vh; overflow: hidden; background-color: #f4f6f9; color: #333; }
-        
-        /* Contenedor principal del CRM (Oculto de inicio) */
-        #app-container { display: flex; width: 100%; height: 100%; }
+        :root {
+            --azul-oscuro: #0b132b;
+            --azul-medio: #1c2541;
+            --azul-acento: #0077b6;
+            --cian-brillante: #48cae4;
+            --fondo-gris: #f4f6f9;
+            --texto-principal: #1e293b;
+            --texto-secundario: #64748b;
+            --borde: #e2e8f0;
+        }
 
-        /* Estilos del Panel Lateral */
-        .sidebar { width: 260px; background-color: #0b132b; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { padding: 20px; background-color: #1c2541; text-align: center; border-bottom: 1px solid #2b3a67; font-size: 20px; font-weight: bold; color: #48cae4; }
-        .sidebar-menu { list-style: none; padding: 20px 0; flex-grow: 1; }
-        .sidebar-menu li { padding: 12px 20px; cursor: pointer; transition: background 0.2s; color: #8d99ae; }
-        .sidebar-menu li:hover, .sidebar-menu li.active { background-color: #1c2541; color: white; border-left: 4px solid #48cae4; }
-        
-        /* Contenido de la derecha */
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background: #f4f6f9; }
-        .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
-        .topbar h1 { font-size: 22px; color: #0b132b; }
-        .logout-btn { background: #ef233c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .logout-btn:hover { background: #d90429; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        html, body { width: 100%; height: 100vh; overflow: hidden; background-color: var(--fondo-gris); color: var(--texto-principal); }
 
-        .content-body { padding: 30px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .card h3 { margin-bottom: 15px; color: #1c2541; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
-        th { background-color: #f8fafc; color: #475569; }
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .badge-activo { background: #d1fae5; color: #065f46; }
-        .badge-pendiente { background: #fef3c7; color: #92400e; }
-
-        /* PANTALLA DE LOGIN (Capa flotante que bloquea todo hasta entrar) */
+        /* --- PANTALLA DE LOGIN OBLIGATORIA --- */
         #login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #0b132b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 99999;
         }
         .login-box {
-            background: #1c2541;
-            padding: 40px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            color: white;
+            background: var(--azul-medio); padding: 40px; border-radius: 12px;
+            width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            text-align: center; color: white; border: 1px solid #2b3a67;
+        }
+        .login-logo-placeholder {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 10px; margin-bottom: 10px; font-size: 26px; font-weight: 800; color: var(--cian-brillante);
+        }
+        .login-input {
+            width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67;
+            background: var(--azul-oscuro); color: white; font-size: 14px; outline: none;
+        }
+        .login-input:focus { border-color: var(--cian-brillante); }
+        .login-btn {
+            width: 100%; padding: 12px; background: var(--azul-acento); color: white;
+            border: none; border-radius: 6px; font-weight: 600; font-size: 15px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .login-btn:hover { background: #005f92; }
+
+        /* --- ESTRUCTURA PRINCIPAL DEL CRM --- */
+        #app-container { display: flex; width: 100%; height: 100%; }
+
+        /* Barra Lateral */
+        .sidebar { width: 260px; background-color: var(--azul-oscuro); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header {
+            padding: 22px 20px; background-color: var(--azul-medio); text-align: center;
+            border-bottom: 1px solid #2b3a67; font-size: 22px; font-weight: 800; color: var(--cian-brillante);
+            letter-spacing: 0.5px;
+        }
+        .user-badge-box {
+            padding: 15px 20px; background: rgba(255,255,255,0.04); border-bottom: 1px solid #1e293b;
+            font-size: 12px; color: #94a3b8;
+        }
+        .user-badge-box strong { display: block; color: white; font-size: 13px; margin-bottom: 4px; word-break: break-all; }
+        .role-tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;
+            font-weight: bold; text-transform: uppercase; background: var(--azul-acento); color: white;
+        }
+
+        .sidebar-menu { list-style: none; padding: 15px 0; flex-grow: 1; }
+        .sidebar-menu li {
+            padding: 13px 22px; cursor: pointer; transition: all 0.2s; color: #94a3b8;
+            font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar-menu li:hover { background-color: rgba(255,255,255,0.05); color: white; }
+        .sidebar-menu li.active {
+            background-color: var(--azul-medio); color: white;
+            border-left: 4px solid var(--cian-brillante); font-weight: 600;
+        }
+
+        /* Área Principal */
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar {
+            background: white; padding: 16px 30px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid var(--borde); position: sticky; top: 0; z-index: 10;
+        }
+        .topbar h1 { font-size: 20px; color: var(--azul-oscuro); }
+        .btn-primary {
+            background: var(--azul-acento); color: white; border: none; padding: 9px 16px;
+            border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s;
+        }
+        .btn-primary:hover { background: #005f92; }
+        .logout-btn {
+            background: #ef233c; color: white; border: none; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;
+        }
+        .logout-btn:hover { background: #d90429; }
+
+        .content-body { padding: 28px 30px; }
+
+        /* Secciones / Pestañas */
+        .tab-section { display: none; animation: fadeIn 0.2s ease-in-out; }
+        .tab-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tarjetas KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .kpi-card {
+            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border-left: 4px solid var(--azul-acento);
+        }
+        .kpi-card span { font-size: 13px; color: var(--texto-secundario); font-weight: 500; }
+        .kpi-card h2 { font-size: 26px; color: var(--azul-oscuro); margin-top: 6px; }
+
+        /* Tarjetas generales y Tablas */
+        .card { background: white; padding: 22px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 22px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-header h3 { color: var(--azul-medio); font-size: 17px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borde); font-size: 14px; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 600; }
+        tr:hover td { background-color: #f8fafc; }
+
+        /* Badges de Estado */
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .estado-activo, .estado-firmado { background: #dcfce7; color: #166534; }
+        .estado-pendiente, .estado-negociacion { background: #fef3c7; color: #92400e; }
+        .estado-prospecto { background: #e0f2fe; color: #075985; }
+        .estado-cancelado { background: #fee2e2; color: #991b1b; }
+
+        /* Columnas Kanban Estados de Venta */
+        .pipeline-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .pipeline-col { background: #e2e8f0; border-radius: 8px; padding: 14px; min-height: 360px; }
+        .pipeline-col h4 { font-size: 14px; color: var(--azul-oscuro); margin-bottom: 12px; display: flex; justify-content: space-between; }
+        .deal-card {
+            background: white; padding: 14px; border-radius: 6px; margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08); border-left: 3px solid var(--azul-acento);
+        }
+        .deal-card strong { display: block; font-size: 14px; color: var(--azul-oscuro); margin-bottom: 4px; }
+        .deal-card small { color: var(--texto-secundario); display: block; margin-bottom: 8px; }
+        .deal-card select { width: 100%; padding: 5px; font-size: 12px; border-radius: 4px; border: 1px solid #cbd5e1; }
+
+        /* Modales */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-box { background: white; padding: 26px; border-radius: 10px; width: 90%; max-width: 450px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #334155; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE LOGIN OBLIGATORIA -->
+    <!-- 1. PANTALLA DE LOGIN OBLIGATORIA -->
     <div id="login-overlay">
         <div class="login-box">
-            <h2 style="margin-bottom: 8px; color: #48cae4; font-size: 24px;">Grupo Azul</h2>
-            <p style="margin-bottom: 24px; color: #8d99ae; font-size: 14px;">Acceso seguro al sistema CRM</p>
+            <div class="login-logo-placeholder">
+                <!-- Si subes tu logo a GitHub como logo.png, descomenta la siguiente línea: -->
+                <!-- <img src="logo.png" alt="Grupo Azul" style="max-height: 55px;"> -->
+                <span>GRUPO AZUL</span>
+            </div>
+            <p style="margin-bottom: 24px; color: #94a3b8; font-size: 14px;">Portal Comercial y Gestión CRM</p>
             
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div style="margin-bottom: 16px; text-align: left;">
-                    <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #8d99ae;">Correo electrónico</label>
-                    <input type="email" id="email" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67; background: #0b132b; color: white; box-sizing: border-box;">
+                    <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #94a3b8;">Correo corporativo</label>
+                    <input type="email" id="email" class="login-input" placeholder="usuario@grupoazul.com" required>
                 </div>
                 
                 <div style="margin-bottom: 24px; text-align: left;">
-                    <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #8d99ae;">Contraseña</label>
-                    <input type="password" id="password" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67; background: #0b132b; color: white; box-sizing: border-box;">
+                    <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #94a3b8;">Contraseña</label>
+                    <input type="password" id="password" class="login-input" placeholder="••••••••" required>
                 </div>
                 
-                <button type="submit" style="width: 100%; padding: 12px; background: #0077b6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">Entrar al CRM</button>
+                <button type="submit" id="btn-login-submit" class="login-btn">Iniciar Sesión</button>
             </form>
             
-            <p id="login-error" style="color: #ff4d4d; font-size: 13px; margin-top: 16px; display: none;"></p>
+            <p id="login-error" style="color: #ff6b6b; font-size: 13px; margin-top: 16px; display: none;"></p>
         </div>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL DEL CRM -->
+    <!-- 2. APLICACIÓN CRM COMPLETA -->
     <div id="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">Grupo Azul</div>
-            <ul class="sidebar-menu">
-                <li class="active">Panel Principal</li>
-                <li>Clientes</li>
-                <li>Contratos</li>
-                <li>Configuración</li>
-            </ul>
-        </div>
+        <!-- Barra lateral -->
+        <aside class="sidebar">
+            <div class="sidebar-header">GRUPO AZUL</div>
+            
+            <div class="user-badge-box">
+                <strong id="display-user-email">Cargando usuario...</strong>
+                Rango: <span id="display-user-role" class="role-tag">Admin</span>
+            </div>
 
-        <div class="main-content">
-            <div class="topbar">
-                <h1>Gestión de Clientes y Contratos</h1>
-                <button class="logout-btn" onclick="handleLogout()">Cerrar Sesión</button>
-            </div>
+            <ul class="sidebar-menu">
+                <li class="active" onclick="cambiarPestana('tab-dashboard', this)">📊 Panel Principal</li>
+                <li onclick="cambiarPestana('tab-ventas', this)">📈 Estados de Ventas</li>
+                <li onclick="cambiarPestana('tab-clientes', this)">🏢 Cartera de Clientes</li>
+                <li onclick="cambiarPestana('tab-contratos', this)">📄 Contratos</li>
+                <li id="menu-permisos" onclick="cambiarPestana('tab-permisos', this)">🔐 Permisos y Rangos</li>
+            </ul>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <header class="topbar">
+                <h1 id="page-title">Panel Principal</h1>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn-primary" onclick="abrirModal('modal-venta')">+ Nueva Venta / Contrato</button>
+                    <button class="logout-btn" onclick="handleLogout()">Cerrar Sesión</button>
+                </div>
+            </header>
+
             <div class="content-body">
-                <div class="card">
-                    <h3>Resumen de Actividad</h3>
-                    <p>Bienvenido al CRM corporativo de Grupo Azul. Autenticación sincronizada correctamente con Supabase.</p>
-                </div>
                 
-                <div class="card">
-                    <h3>Últimos Contratos Registrados</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Servicio</th>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Empresa S.A.</td>
-                                <td>Consultoría Integral</td>
-                                <td><span class="badge badge-activo">Activo</span></td>
-                                <td>18/11/2026</td>
-                            </tr>
-                            <tr>
-                                <td>Comercializadora Norte</td>
-                                <td>Suministro Energético</td>
-                                <td><span class="badge badge-pendiente">Pendiente</span></td>
-                                <td>17/11/2026</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <!-- PESTAÑA 1: PANEL PRINCIPAL -->
+                <section id="tab-dashboard" class="tab-section active">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <span>Ventas Firmadas (Mes)</span>
+                            <h2 id="kpi-firmadas">0</h2>
+                        </div>
+                        <div class="kpi-card" style="border-left-color: #f59e0b;">
+                            <span>En Negociación / Pendientes</span>
+                            <h2 id="kpi-pendientes">0</h2>
+                        </div>
+                        <div class="kpi-card" style="border-left-color: #10b981;">
+                            <span>Clientes Activos</span>
+                            <h2 id="kpi-clientes">0</h2>
+                        </div>
+                        <div class="kpi-card" style="border-left-color: #6366f1;">
+                            <span>Facturación Estimada</span>
+                            <h2 id="kpi-ingresos">0 €</h2>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Actividad Reciente de Ventas</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Producto / Tarifa</th>
+                                    <th>Comercial</th>
+                                    <th>Importe</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-resumen-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 2: ESTADOS DE VENTAS (EMBUDO VISUAL) -->
+                <section id="tab-ventas" class="tab-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Seguimiento por Estado de Venta</h3>
+                            <small style="color: #64748b;">Cambia el estado desde el desplegable de cada tarjeta para mover la operación</small>
+                        </div>
+                        <div class="pipeline-grid">
+                            <div class="pipeline-col">
+                                <h4>🔵 Prospecto / Contacto <span id="count-prospecto">0</span></h4>
+                                <div id="col-prospecto"></div>
+                            </div>
+                            <div class="pipeline-col">
+                                <h4>🟡 En Negociación <span id="count-negociacion">0</span></h4>
+                                <div id="col-negociacion"></div>
+                            </div>
+                            <div class="pipeline-col">
+                                <h4>🟠 Pendiente Firma / Validación <span id="count-pendiente">0</span></h4>
+                                <div id="col-pendiente"></div>
+                            </div>
+                            <div class="pipeline-col">
+                                <h4>🟢 Venta Firmada / Activa <span id="count-firmado">0</span></h4>
+                                <div id="col-firmado"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 3: CARTERA DE CLIENTES -->
+                <section id="tab-clientes" class="tab-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Directorio de Clientes</h3>
+                            <button class="btn-primary" onclick="abrirModal('modal-cliente')">+ Añadir Cliente</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Empresa / Titular</th>
+                                    <th>CIF / NIF</th>
+                                    <th>Teléfono</th>
+                                    <th>Correo</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-clientes-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 4: CONTRATOS -->
+                <section id="tab-contratos" class="tab-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Listado General de Contratos</h3>
+                            <button class="btn-primary" onclick="abrirModal('modal-venta')">+ Nuevo Contrato</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Servicio Contratado</th>
+                                    <th>Importe Anual</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-contratos-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 5: PERMISOS Y RANGOS -->
+                <section id="tab-permisos" class="tab-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Gestión de Permisos y Rangos de Usuario</h3>
+                        </div>
+                        <p style="font-size: 14px; color: #475569; margin-bottom: 16px;">
+                            Aquí puedes probar cómo cambia la interfaz según el rango asignado al usuario, y ver cómo configurarlo permanentemente en Supabase:
+                        </p>
+                        
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
+                            <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 8px;">Simular vista por Rango actual:</label>
+                            <select id="selector-rol-prueba" onchange="aplicarPermisosRol(this.value)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 14px;">
+                                <option value="admin">Administrador (Acceso total + Gestión de Permisos)</option>
+                                <option value="jefe">Jefe de Equipo (Ve todas las ventas y clientes, sin acceso a Permisos)</option>
+                                <option value="comercial">Comercial (Solo ve sus propias operaciones y clientes)</option>
+                            </select>
+                        </div>
+
+                        <h4 style="margin-bottom: 10px; color: var(--azul-oscuro);">¿Cómo asignar un rango fijo a cada empleado en Supabase?</h4>
+                        <ol style="padding-left: 20px; font-size: 14px; color: #334155; line-height: 1.7;">
+                            <li>Entra a tu panel de <strong>Supabase</strong> > <strong>Authentication</strong> > <strong>Users</strong>.</li>
+                            <li>Haz clic sobre el usuario al que deseas cambiarle el rango.</li>
+                            <li>Baja hasta la sección <strong>User Metadata</strong> (o <em>Raw User Meta Data</em>) y haz clic en editar.</li>
+                            <li>Escribe exactamente: <code>{"rol": "admin"}</code>, <code>{"rol": "jefe"}</code> o <code>{"rol": "comercial"}</code> y guarda.</li>
+                            <li>La próxima vez que ese usuario inicie sesión, el CRM aplicará automáticamente sus permisos reales.</li>
+                        </ol>
+                    </div>
+                </section>
+
             </div>
+        </main>
+    </div>
+
+    <!-- MODAL: NUEVA VENTA / CONTRATO -->
+    <div id="modal-venta" class="modal-backdrop">
+        <div class="modal-box">
+            <h3 style="margin-bottom: 16px; color: var(--azul-oscuro);">Registrar Nueva Operación</h3>
+            <form onsubmit="guardarVenta(event)">
+                <div class="form-group">
+                    <label>Nombre del Cliente</label>
+                    <input type="text" id="venta-cliente" required placeholder="Ej. Industrias del Sur S.L.">
+                </div>
+                <div class="form-group">
+                    <label>Servicio / Tarifa</label>
+                    <input type="text" id="venta-servicio" required placeholder="Ej. Suministro Luz + Gas Empresa">
+                </div>
+                <div class="form-group">
+                    <label>Importe (€)</label>
+                    <input type="number" id="venta-importe" required placeholder="1500">
+                </div>
+                <div class="form-group">
+                    <label>Estado Inicial</label>
+                    <select id="venta-estado">
+                        <option value="prospecto">Prospecto / Contacto</option>
+                        <option value="negociacion">En Negociación</option>
+                        <option value="pendiente">Pendiente de Firma</option>
+                        <option value="firmado">Venta Firmada / Activa</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="cerrarModal('modal-venta')" style="padding: 9px 14px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Operación</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- SCRIPT DE SUPABASE -->
+    <!-- MODAL: NUEVO CLIENTE -->
+    <div id="modal-cliente" class="modal-backdrop">
+        <div class="modal-box">
+            <h3 style="margin-bottom: 16px; color: var(--azul-oscuro);">Añadir Nuevo Cliente</h3>
+            <form onsubmit="guardarCliente(event)">
+                <div class="form-group">
+                    <label>Nombre o Razón Social</label>
+                    <input type="text" id="cli-nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>CIF / NIF</label>
+                    <input type="text" id="cli-cif" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="cli-tel" required>
+                </div>
+                <div class="form-group">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="cli-email" required>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="cerrarModal('modal-cliente')" style="padding: 9px 14px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE SUPABASE Y LÓGICA DEL CRM -->
     <script>
+        // --- CONFIGURACIÓN SUPABASE ---
         const SUPABASE_URL = 'https://ughatbtpnkrrgcfalahz.supabase.co';
-        // Nota: Asegúrate de usar tu llave pública (anon key) real aquí abajo
-        const SUPABASE_ANON_KEY = 'sb_publishable_DXgx_6-neFL-BpTQLBdFew_XIAizYsQ'; 
+        // IMPORTANTE: Pega aquí tu llave pública "anon" / "public" (la que empieza por eyJ... o sb_publishable_...)
+        const SUPABASE_ANON_KEY = 'sb_publishable_DXgx_6-neFL-BpTQLBdFew_XIAizYsQ';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let usuarioActualEmail = '';
+        let rolActual = 'admin';
+
+        // Datos iniciales de ejemplo (guardados localmente mientras conectas tablas SQL)
+        let ventas = JSON.parse(localStorage.getItem('ga_ventas')) || [
+            { id: 'CTR-101', cliente: 'Logística Mediterránea S.A.', servicio: 'Tarifa Indexada Pyme', importe: 3200, estado: 'firmado', comercial: 'admin@grupoazul.com' },
+            { id: 'CTR-102', cliente: 'Panaderías Artesanas Norte', servicio: 'Suministro Gas + Luz', importe: 1850, estado: 'pendiente', comercial: 'comercial1@grupoazul.com' },
+            { id: 'CTR-103', cliente: 'Talleres Mecánicos del Sur', servicio: 'Estudio Eficiencia', importe: 950, estado: 'negociacion', comercial: 'admin@grupoazul.com' },
+            { id: 'CTR-104', cliente: 'Hotel Costa Azul', servicio: 'Alta Potencia', importe: 6400, estado: 'prospecto', comercial: 'comercial1@grupoazul.com' }
+        ];
+
+        let clientes = JSON.parse(localStorage.getItem('ga_clientes')) || [
+            { nombre: 'Logística Mediterránea S.A.', cif: 'B12345678', tel: '600 111 222', email: 'contacto@logmed.es', estado: 'Activo' },
+            { nombre: 'Panaderías Artesanas Norte', cif: 'B87654321', tel: '600 333 444', email: 'info@panaderiasnorte.es', estado: 'Activo' },
+            { nombre: 'Hotel Costa Azul', cif: 'A11223344', tel: '600 555 666', email: 'gerencia@hotelcostaazul.es', estado: 'Prospecto' }
+        ];
+
+        // --- VERIFICAR SESIÓN AL CARGAR ---
         window.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                document.getElementById('login-overlay').style.display = 'none';
+                iniciarInterfazUsuario(session.user);
             }
+            renderizarTodo();
         });
 
         async function handleLogin(event) {
@@ -165,25 +467,208 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('login-error');
+            const btn = document.getElementById('btn-login-submit');
 
             errorElement.style.display = 'none';
+            btn.textContent = 'Verificando...';
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            btn.textContent = 'Iniciar Sesión';
 
             if (error) {
-                errorElement.textContent = 'Correo o contraseña incorrectos.';
+                errorElement.textContent = 'Error: ' + (error.message === 'Invalid login credentials' ? 'Correo o contraseña incorrectos.' : error.message);
                 errorElement.style.display = 'block';
             } else {
-                document.getElementById('login-overlay').style.display = 'none';
+                iniciarInterfazUsuario(data.user);
             }
+        }
+
+        function iniciarInterfazUsuario(user) {
+            document.getElementById('login-overlay').style.display = 'none';
+            usuarioActualEmail = user.email;
+            document.getElementById('display-user-email').textContent = user.email;
+
+            // Leer rol desde los metadatos de Supabase (si no tiene, por defecto es 'admin')
+            const rolSupabase = (user.user_metadata && user.user_metadata.rol) ? user.user_metadata.rol : 'admin';
+            aplicarPermisosRol(rolSupabase);
         }
 
         async function handleLogout() {
             await supabaseClient.auth.signOut();
             window.location.reload();
+        }
+
+        // --- CONTROL DE PERMISOS POR RANGO ---
+        function aplicarPermisosRol(rol) {
+            rolActual = rol;
+            document.getElementById('display-user-role').textContent = rol.toUpperCase();
+            document.getElementById('selector-rol-prueba').value = rol;
+
+            const menuPermisos = document.getElementById('menu-permisos');
+            if (rol === 'admin') {
+                menuPermisos.style.display = 'flex';
+            } else {
+                menuPermisos.style.display = 'none';
+                // Si estaba viendo permisos y cambia a comercial, volver al dashboard
+                if (document.getElementById('tab-permisos').classList.contains('active')) {
+                    cambiarPestana('tab-dashboard', document.querySelector('.sidebar-menu li'));
+                }
+            }
+            renderizarTodo();
+        }
+
+        // --- NAVEGACIÓN ENTRE PESTAÑAS ---
+        function cambiarPestana(tabId, elementoMenu) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            if (elementoMenu) elementoMenu.classList.add('active');
+
+            const titulos = {
+                'tab-dashboard': 'Panel Principal',
+                'tab-ventas': 'Estados de Ventas',
+                'tab-clientes': 'Cartera de Clientes',
+                'tab-contratos': 'Contratos',
+                'tab-permisos': 'Permisos y Rangos'
+            };
+            document.getElementById('page-title').textContent = titulos[tabId] || 'CRM Grupo Azul';
+        }
+
+        // --- RENDERIZADO DE DATOS ---
+        function renderizarTodo() {
+            localStorage.setItem('ga_ventas', JSON.stringify(ventas));
+            localStorage.setItem('ga_clientes', JSON.stringify(clientes));
+
+            // Filtrar ventas si el rol es comercial
+            const ventasVisibles = (rolActual === 'comercial')
+                ? ventas.filter(v => v.comercial === usuarioActualEmail)
+                : ventas;
+
+            // 1. KPIs
+            const firmadas = ventasVisibles.filter(v => v.estado === 'firmado');
+            const pendientes = ventasVisibles.filter(v => v.estado === 'pendiente' || v.estado === 'negociacion');
+            const totalEuros = firmadas.reduce((acc, v) => acc + Number(v.importe), 0);
+
+            document.getElementById('kpi-firmadas').textContent = firmadas.length;
+            document.getElementById('kpi-pendientes').textContent = pendientes.length;
+            document.getElementById('kpi-clientes').textContent = clientes.length;
+            document.getElementById('kpi-ingresos').textContent = totalEuros.toLocaleString('es-ES') + ' €';
+
+            // 2. Tabla Resumen Dashboard
+            const tbodyResumen = document.getElementById('tabla-resumen-body');
+            tbodyResumen.innerHTML = ventasVisibles.map(v => `
+                <tr>
+                    <td><strong>${v.cliente}</strong></td>
+                    <td>${v.servicio}</td>
+                    <td>${v.comercial}</td>
+                    <td>${Number(v.importe).toLocaleString('es-ES')} €</td>
+                    <td><span class="badge estado-${v.estado}">${formatearEstado(v.estado)}</span></td>
+                </tr>
+            `).join('');
+
+            // 3. Columnas Estados de Ventas (Kanban)
+            ['prospecto', 'negociacion', 'pendiente', 'firmado'].forEach(est => {
+                const items = ventasVisibles.filter(v => v.estado === est);
+                document.getElementById(`count-${est}`).textContent = items.length;
+                document.getElementById(`col-${est}`).innerHTML = items.map(v => `
+                    <div class="deal-card">
+                        <strong>${v.cliente}</strong>
+                        <small>${v.servicio} • ${Number(v.importe).toLocaleString('es-ES')} €</small>
+                        <select onchange="cambiarEstadoVenta('${v.id}', this.value)">
+                            <option value="prospecto" ${v.estado === 'prospecto' ? 'selected' : ''}>Prospecto</option>
+                            <option value="negociacion" ${v.estado === 'negociacion' ? 'selected' : ''}>En Negociación</option>
+                            <option value="pendiente" ${v.estado === 'pendiente' ? 'selected' : ''}>Pendiente Firma</option>
+                            <option value="firmado" ${v.estado === 'firmado' ? 'selected' : ''}>Firmado / Activo</option>
+                        </select>
+                    </div>
+                `).join('');
+            });
+
+            // 4. Tabla Clientes
+            document.getElementById('tabla-clientes-body').innerHTML = clientes.map(c => `
+                <tr>
+                    <td><strong>${c.nombre}</strong></td>
+                    <td>${c.cif}</td>
+                    <td>${c.tel}</td>
+                    <td>${c.email}</td>
+                    <td><span class="badge estado-${c.estado.toLowerCase()}">${c.estado}</span></td>
+                </tr>
+            `).join('');
+
+            // 5. Tabla Contratos
+            document.getElementById('tabla-contratos-body').innerHTML = ventasVisibles.map(v => `
+                <tr>
+                    <td>${v.id}</td>
+                    <td><strong>${v.cliente}</strong></td>
+                    <td>${v.servicio}</td>
+                    <td>${Number(v.importe).toLocaleString('es-ES')} €</td>
+                    <td><span class="badge estado-${v.estado}">${formatearEstado(v.estado)}</span></td>
+                    <td>
+                        <button onclick="eliminarVenta('${v.id}')" style="color: #ef233c; border: none; background: none; cursor: pointer; font-weight: bold;">Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatearEstado(est) {
+            const mapa = {
+                'prospecto': 'Prospecto',
+                'negociacion': 'En Negociación',
+                'pendiente': 'Pendiente Firma',
+                'firmado': 'Firmado / Activo'
+            };
+            return mapa[est] || est;
+        }
+
+        function cambiarEstadoVenta(id, nuevoEstado) {
+            const idx = ventas.findIndex(v => v.id === id);
+            if (idx !== -1) {
+                ventas[idx].estado = nuevoEstado;
+                renderizarTodo();
+            }
+        }
+
+        function eliminarVenta(id) {
+            if (confirm('¿Seguro que deseas eliminar este contrato?')) {
+                ventas = ventas.filter(v => v.id !== id);
+                renderizarTodo();
+            }
+        }
+
+        // --- MODALES Y ALTAS ---
+        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function guardarVenta(e) {
+            e.preventDefault();
+            const nueva = {
+                id: 'CTR-' + Math.floor(105 + Math.random() * 890),
+                cliente: document.getElementById('venta-cliente').value,
+                servicio: document.getElementById('venta-servicio').value,
+                importe: document.getElementById('venta-importe').value,
+                estado: document.getElementById('venta-estado').value,
+                comercial: usuarioActualEmail || 'admin@grupoazul.com'
+            };
+            ventas.unshift(nueva);
+            e.target.reset();
+            cerrarModal('modal-venta');
+            renderizarTodo();
+        }
+
+        function guardarCliente(e) {
+            e.preventDefault();
+            clientes.unshift({
+                nombre: document.getElementById('cli-nombre').value,
+                cif: document.getElementById('cli-cif').value,
+                tel: document.getElementById('cli-tel').value,
+                email: document.getElementById('cli-email').value,
+                estado: 'Activo'
+            });
+            e.target.reset();
+            cerrarModal('modal-cliente');
+            renderizarTodo();
         }
     </script>
 </body>
