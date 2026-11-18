@@ -4,26 +4,28 @@
     <meta charset="utf-8" />
     <title>CRM - Grupo Azul</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <meta content="CRM Corporativo Grupo Azul" name="description" />
+
     <!-- Librería oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Bootstrap 5 & FontAwesome desde CDN -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 
+    <!-- Bootstrap 5 y FontAwesome / Icons CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" rel="stylesheet">
+
+    <!-- Estilos unificados -->
     <style>
         :root {
+            --bs-primary: #0077b6;
             --ga-dark: #0b132b;
             --ga-navy: #1c2541;
-            --ga-primary: #0077b6;
             --ga-cyan: #48cae4;
-            --ga-bg: #f5f6f8;
         }
 
         body {
-            background-color: var(--ga-bg);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             overflow-x: hidden;
         }
@@ -33,135 +35,105 @@
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             background: linear-gradient(135deg, var(--ga-dark) 0%, var(--ga-navy) 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             z-index: 99999;
         }
         .login-card {
             background: var(--ga-navy);
-            padding: 40px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
+            padding: 40px; border-radius: 12px;
+            width: 90%; max-width: 400px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.45);
-            text-align: center;
-            color: #fff;
+            text-align: center; color: #fff;
             border: 1px solid #2b3a67;
         }
         .login-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #2b3a67;
-            background: var(--ga-dark);
-            color: #fff;
-            font-size: 14px;
+            width: 100%; padding: 12px; border-radius: 6px;
+            border: 1px solid #2b3a67; background: var(--ga-dark);
+            color: #fff; font-size: 14px;
         }
         .login-input:focus { outline: none; border-color: var(--ga-cyan); }
 
-        /* --- LAYOUT DEL CRM --- */
-        .wrapper { display: flex; min-height: 100vh; }
-        .sidebar {
-            width: 260px;
-            background: #ffffff;
-            border-right: 1px solid #e5e9f2;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-        .sidebar-brand {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid #e5e9f2;
-            background: var(--ga-dark);
-            color: var(--ga-cyan);
-            font-weight: 800;
-            font-size: 20px;
-            letter-spacing: 0.5px;
-        }
-        .nav-list { list-style: none; padding: 15px 0; margin: 0; }
-        .nav-item-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 13px 22px;
-            color: #5a6a85;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .nav-item-link:hover, .nav-item-link.active {
-            background: #eef4ff;
-            color: var(--ga-primary);
-            border-right: 3px solid var(--ga-primary);
-            font-weight: 600;
-        }
-
-        .main-area { flex-grow: 1; display: flex; flex-direction: column; }
-        .topbar {
-            background: #ffffff;
-            height: 68px;
-            padding: 0 28px;
-            border-bottom: 1px solid #e5e9f2;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .content-wrap { padding: 28px; }
+        /* --- LAYOUT GENERAL --- */
+        #layout-wrapper { display: flex; min-height: 100vh; }
+        .vertical-menu { width: 260px; background: #fff; border-right: 1px solid #e2e8f0; flex-shrink: 0; }
+        .navbar-brand-box { padding: 20px; text-align: center; background: var(--ga-dark); color: var(--ga-cyan); font-weight: 800; font-size: 18px; letter-spacing: 0.5px; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; }
+        #page-topbar { background: #fff; border-bottom: 1px solid #e2e8f0; height: 70px; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+        .page-content { padding: 30px; }
 
         /* --- TARJETAS DE ESTADOS --- */
         .state-card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 16px;
-            border: 1px solid #e5e9f2;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            height: 100%;
+            background: #fff; border-radius: 8px; padding: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease; height: 100%;
+            text-decoration: none; color: inherit;
         }
-        .state-card:hover {
-            border-color: var(--ga-primary);
-            box-shadow: 0 4px 12px rgba(0,86,179,0.08);
-        }
+        .state-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
         .state-icon {
-            width: 44px; height: 44px;
-            border-radius: 8px;
+            width: 45px; height: 45px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 18px; flex-shrink: 0;
         }
         .state-count { font-size: 22px; font-weight: 700; color: #1e293b; line-height: 1.1; }
-        .state-label { font-size: 12.5px; color: #64748b; font-weight: 500; margin-top: 2px; }
+        .state-label { font-size: 13px; color: #64748b; font-weight: 500; margin-top: 2px; }
 
-        /* --- TOOLBAR DE CONTRATOS --- */
+        .state-subir-documentacion .state-icon { background: #e0f2fe; color: #0284c7; }
+        .state-autorizacion .state-icon { background: #fef3c7; color: #d97706; }
+        .state-firma .state-icon { background: #ede9fe; color: #7c3aed; }
+        .state-verificacion .state-icon { background: #f1f5f9; color: #475569; }
+        .state-verificado .state-icon { background: #dcfce7; color: #16a34a; }
+        .state-tramitado .state-icon { background: #d1fae5; color: #059669; }
+        .state-activo .state-icon { background: #bbf7d0; color: #15803d; }
+        .state-incidencia .state-icon { background: #fee2e2; color: #dc2626; }
+        .state-incidencia-alternativa .state-icon { background: #ffedd5; color: #ea580c; }
+        .state-ko .state-icon { background: #fecaca; color: #991b1b; }
+        .state-comentarios .state-icon { background: #e0e7ff; color: #4f46e5; }
+
+        /* --- ACCESOS RÁPIDOS --- */
+        .dashboard-shortcut {
+            background: #fff; border-radius: 8px; padding: 18px;
+            border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: inherit; transition: 0.15s; height: 100%;
+        }
+        .dashboard-shortcut:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
+        .dashboard-shortcut__icon {
+            width: 48px; height: 48px; border-radius: 10px; background: #e0f2fe; color: #0284c7;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+
+        /* --- CONTRATOS Y ARCHIVOS --- */
         .contracts-toolbar {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            background: #fff;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid #e5e9f2;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            display: flex; gap: 12px; align-items: center; background: #fff;
+            padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; flex-wrap: wrap;
         }
-        .contracts-quick-search {
-            display: flex;
-            gap: 8px;
-            flex-grow: 1;
-            max-width: 600px;
+        .contracts-quick-search { display: flex; gap: 8px; flex-grow: 1; max-width: 550px; }
+        .btn-expand-row {
+            width: 26px; height: 26px; border-radius: 50%; border: none;
+            background: var(--bs-primary); color: #fff; font-size: 12px;
+            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
         }
+        .btn-expand-row.expanded { background: #dc2626; }
+        .contract-detail-row { background-color: #f8fafc; }
+        .detail-box {
+            padding: 16px 20px; border-left: 4px solid var(--bs-primary);
+            background: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 6px 0;
+        }
+        .detail-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; display: block; }
+        .detail-value { font-size: 13.5px; color: #1e293b; font-weight: 500; }
+
+        .dropzone-box {
+            border: 2px dashed #ced4da; border-radius: 8px; padding: 30px;
+            text-align: center; background: #fff; cursor: pointer; transition: 0.2s;
+        }
+        .dropzone-box:hover { border-color: var(--bs-primary); background: #f8fafc; }
 
         .section-view { display: none; }
         .section-view.active { display: block; }
     </style>
 </head>
-<body>
+
+<body data-sidebar="light">
 
     <!-- 1. PANTALLA DE LOGIN OBLIGATORIA CON SUPABASE -->
     <div id="login-overlay">
@@ -184,120 +156,392 @@
         </div>
     </div>
 
-    <!-- 2. INTERFAZ PRINCIPAL DEL CRM -->
-    <div class="wrapper">
-        <!-- Menú Lateral -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">GRUPO AZUL</div>
-            <div class="p-3 border-bottom bg-light">
-                <small class="text-muted d-block" style="font-size: 11px;">Usuario conectado:</small>
-                <strong id="sidebar-user-email" style="font-size: 13px; color: #0b132b; word-break: break-all;">...</strong>
+    <!-- 2. ESTRUCTURA PRINCIPAL DEL CRM -->
+    <div id="layout-wrapper">
+
+        <!-- HEADER SUPERIOR -->
+        <header id="page-topbar">
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect vertical-menu-btn">
+                    <i class="fa fa-fw fa-bars"></i>
+                </button>
             </div>
-            <ul class="nav-list">
-                <li><a class="nav-item-link active" onclick="verSeccion('view-dashboard', this)"><i class="fas fa-chart-area"></i> Tablero</a></li>
-                <li><a class="nav-item-link" onclick="verSeccion('view-contratos', this)"><i class="fas fa-file-contract"></i> Contratos</a></li>
-                <li><a class="nav-item-link" onclick="verSeccion('view-agenda', this)"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
-                <li><a class="nav-item-link" onclick="verSeccion('view-comerciales', this)"><i class="fas fa-user-friends"></i> Comerciales</a></li>
-            </ul>
-        </aside>
 
-        <!-- Área de Contenido -->
-        <div class="main-area">
-            <header class="topbar">
-                <h5 class="mb-0 fw-bold text-dark" id="header-title">Dashboard</h5>
-                <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-sm btn-outline-danger" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</button>
-                </div>
-            </header>
-
-            <div class="content-wrap">
-                
-                <!-- VISTA 1: TABLERO / DASHBOARD -->
-                <div id="view-dashboard" class="section-view active">
-                    <h6 class="fw-bold text-uppercase text-muted mb-3" style="font-size: 12px;">Estado de los contratos (Haz clic para filtrar)</h6>
-                    <div class="row g-3" id="grid-estados"></div>
-                </div>
-
-                <!-- VISTA 2: CONTRATOS (CON BARRA DE BÚSQUEDA Y FILTRO AVANZADO) -->
-                <div id="view-contratos" class="section-view">
-                    <div class="contracts-toolbar">
-                        <div class="contracts-quick-search">
-                            <select class="form-select form-select-sm" id="quick-field" style="max-width: 150px;">
-                                <option value="referencia">Referencia</option>
-                                <option value="cups">CUPS</option>
-                                <option value="cliente">Cliente</option>
-                            </select>
-                            <input class="form-control form-control-sm" id="quick-value" type="search" placeholder="Buscar contrato..." oninput="filtrarContratosRapido()">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevoContrato">
+                    <i class="fas fa-plus me-1"></i> Nuevo Contrato
+                </button>
+                <div class="dropdown d-inline-block">
+                    <button type="button" class="btn header-item waves-effect d-flex align-items-center" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <div class="avatar-xs d-inline-block me-2">
+                            <span class="avatar-title rounded-circle bg-light text-body p-2 border">G</span>
                         </div>
-                        <button type="button" class="btn btn-warning btn-sm fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#modal-filter">
-                            <i class="fas fa-filter me-1"></i> Filtros avanzados
-                        </button>
-                        <span class="text-muted ms-auto" id="contador-resultados" style="font-size: 13px;">0 contratos</span>
+                        <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15" id="user-email-display">grupoazulcol@gmail.com</span>
+                        <i class="uil-angle-down font-size-15 ms-1"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="#" onclick="handleLogout()">
+                            <i class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-danger"></i>
+                            <span class="align-middle text-danger">Cerrar Sesión</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SIDEBAR IZQUIERDO -->
+        <div class="vertical-menu">
+            <div class="navbar-brand-box">GRUPO AZUL</div>
+            <div class="p-3 border-bottom bg-light">
+                <small class="text-muted d-block" style="font-size: 11px;">Conectado como:</small>
+                <strong id="sidebar-user-email" style="font-size: 12px; color: #0b132b; word-break: break-all;">...</strong>
+            </div>
+
+            <div class="sidebar-menu-scroll">
+                <div id="sidebar-menu">
+                    <ul class="metismenu list-unstyled p-3" id="side-menu">
+                        <li class="mb-2">
+                            <a href="#" class="nav-item-link d-flex align-items-center gap-2 text-decoration-none text-dark fw-bold p-2 rounded bg-light" onclick="cambiarVista('view-dashboard', this)">
+                                <i class="fas fa-chart-area text-primary"></i>
+                                <span>Tablero</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="nav-item-link d-flex align-items-center gap-2 text-decoration-none text-secondary p-2 rounded" onclick="cambiarVista('view-contratos', this)">
+                                <i class="fas fa-file-contract"></i>
+                                <span>Contratos</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="nav-item-link d-flex align-items-center gap-2 text-decoration-none text-secondary p-2 rounded" onclick="cambiarVista('view-archivos', this)">
+                                <i class="fas fa-folder-open"></i>
+                                <span>Archivos / Documentación</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="nav-item-link d-flex align-items-center gap-2 text-decoration-none text-secondary p-2 rounded" onclick="cambiarVista('view-agenda', this)">
+                                <i class="fas fa-calendar"></i>
+                                <span>Agenda</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="nav-item-link d-flex align-items-center gap-2 text-decoration-none text-secondary p-2 rounded" onclick="cambiarVista('view-comerciales', this)">
+                                <i class="fas fa-user-friends"></i>
+                                <span>Comerciales</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+
+                    <!-- VISTA 1: TABLERO (DASHBOARD) -->
+                    <div id="view-dashboard" class="section-view active">
+                        <div class="row dashboard-native-title mb-4">
+                            <div class="col-12">
+                                <div class="page-title-box d-flex align-items-center justify-content-between">
+                                    <h4 class="mb-0 fw-bold">Dashboard</h4>
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item active text-muted">Dashboard</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accesos rápidos -->
+                        <section class="dashboard-panel mb-4">
+                            <div class="dashboard-section-header mb-3">
+                                <h5 class="fw-bold mb-1">Accesos rápidos</h5>
+                                <p class="text-muted small">Herramientas disponibles según tus permisos.</p>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-3 col-sm-6">
+                                    <a class="dashboard-shortcut" href="#" onclick="cambiarVista('view-contratos', document.querySelectorAll('.nav-item-link')[1])">
+                                        <span class="dashboard-shortcut__icon"><i class="fas fa-file-contract"></i></span>
+                                        <div>
+                                            <span class="fw-bold d-block text-dark">Contratos</span>
+                                            <small class="text-muted">Consultar producción</small>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <a class="dashboard-shortcut" href="#" onclick="cambiarVista('view-archivos', document.querySelectorAll('.nav-item-link')[2])">
+                                        <span class="dashboard-shortcut__icon" style="background: #e0e7ff; color: #4f46e5;"><i class="fas fa-folder-open"></i></span>
+                                        <div>
+                                            <span class="fw-bold d-block text-dark">Archivos</span>
+                                            <small class="text-muted">Documentación y subidas</small>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <a class="dashboard-shortcut" href="#" onclick="cambiarVista('view-agenda', document.querySelectorAll('.nav-item-link')[3])">
+                                        <span class="dashboard-shortcut__icon" style="background: #ffedd5; color: #ea580c;"><i class="fas fa-calendar-alt"></i></span>
+                                        <div>
+                                            <span class="fw-bold d-block text-dark">Agenda</span>
+                                            <small class="text-muted">Tareas y seguimientos</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 11 Tarjetas de Estado -->
+                        <section class="dashboard-panel">
+                            <div class="dashboard-section-header mb-3">
+                                <h5 class="fw-bold mb-1">Estado de los contratos</h5>
+                                <p class="text-muted small">Selecciona un estado para abrir sus contratos.</p>
+                            </div>
+                            <div class="row dashboard-states g-3" id="grid-estados"></div>
+                        </section>
                     </div>
 
-                    <div class="card border-0 shadow-sm">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Ref. / Contrato</th>
-                                        <th>CUPS</th>
-                                        <th>Cliente</th>
-                                        <th>Servicio / Tarifa</th>
-                                        <th>Comercial</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabla-contratos-body"></tbody>
-                            </table>
+                    <!-- VISTA 2: CONTRATOS -->
+                    <div id="view-contratos" class="section-view">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="page-title-box d-flex align-items-center justify-content-between">
+                                    <h4 class="mb-0 fw-bold">Contratos</h4>
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item"><a href="#" onclick="cambiarVista('view-dashboard', document.querySelectorAll('.nav-item-link')[0])">Producción</a></li>
+                                        <li class="breadcrumb-item active text-muted">Contratos</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contracts-toolbar">
+                            <div class="contracts-quick-search">
+                                <select class="form-select form-select-sm" id="contracts-quick-field" style="max-width: 150px;">
+                                    <option value="referencia">Referencia</option>
+                                    <option value="cups">CUPS</option>
+                                    <option value="dni">DNI/CIF</option>
+                                    <option value="telefono">Teléfono</option>
+                                </select>
+                                <input class="form-control form-control-sm" id="contracts-quick-value" type="search" placeholder="Buscar contrato..." oninput="filtrarContratosRapido()">
+                            </div>
+                            <button type="button" class="btn btn-warning btn-sm fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#contracts-modal-filter">
+                                <i class="fas fa-filter me-1"></i> Filtros avanzados
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm border" onclick="restaurarFiltros()">Ver todos</button>
+                            <span class="text-muted ms-auto" id="contador-resultados" style="font-size: 13px;">0 contratos</span>
+                        </div>
+
+                        <div class="card border-0 shadow-sm">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 45px;" title="Ver detalles"></th>
+                                            <th>Contrato</th>
+                                            <th>CUPS</th>
+                                            <th>Estado</th>
+                                            <th>Cliente</th>
+                                            <th>Tarifa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-contratos-body"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- VISTA 3: AGENDA -->
-                <div id="view-agenda" class="section-view">
-                    <div class="card border-0 shadow-sm p-4">
-                        <h5 class="fw-bold mb-3">Agenda y Seguimientos</h5>
-                        <p class="text-muted">No hay eventos pendientes programados.</p>
+                    <!-- VISTA 3: ARCHIVOS / DOCUMENTACIÓN -->
+                    <div id="view-archivos" class="section-view">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="page-title-box d-flex align-items-center justify-content-between">
+                                    <h4 class="mb-0 fw-bold">Archivos y Documentación</h4>
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item"><a href="#">Producción</a></li>
+                                        <li class="breadcrumb-item active text-muted">Archivos</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <input type="hidden" name="pk" value="040826D51" id="pk_contrato_file">
+                                        
+                                        <!-- Zona de Carga -->
+                                        <div class="dropzone-box mb-4" onclick="document.getElementById('file-input').click()">
+                                            <div class="mb-3">
+                                                <i class="display-4 text-muted uil uil-cloud-upload"></i>
+                                            </div>
+                                            <h4>Arrastra algún archivo o haz clic aquí para subirlos</h4>
+                                            <input type="file" id="file-input" class="d-none" onchange="registrarArchivoNuevo(event)">
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="id_tipo_documento" class="form-label fw-bold">Tipo de documento</label>
+                                                <select id="id_tipo_documento" class="form-select">
+                                                    <option value="" selected>Seleccione</option>
+                                                    <option value="DNI DELANTERO">DNI DELANTERO</option>
+                                                    <option value="DNI REVERSO">DNI REVERSO</option>
+                                                    <option value="OTROS">OTROS</option>
+                                                    <option value="FACTURA LUZ 1">FACTURA LUZ 1</option>
+                                                    <option value="FACTURA LUZ 2">FACTURA LUZ 2</option>
+                                                    <option value="FACTURA GAS 1">FACTURA GAS 1</option>
+                                                    <option value="CONTRATO ALQUILER">CONTRATO ALQUILER</option>
+                                                    <option value="RECIBO IBI">RECIBO IBI</option>
+                                                    <option value="ESCRITURA">ESCRITURA</option>
+                                                    <option value="AUDIO VENTA 1">AUDIO VENTA 1</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-center mb-4">
+                                            <button type="button" class="btn btn-primary px-4 fw-bold" onclick="alert('Archivo listo para procesar con Supabase Storage')">Subir archivo</button>
+                                        </div>
+
+                                        <!-- Tabla de Documentos Subidos -->
+                                        <div class="table-responsive">
+                                            <table class="table table-centered table-nowrap align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">Documento</th>
+                                                        <th scope="col">Autor</th>
+                                                        <th scope="col">Fecha Subida</th>
+                                                        <th scope="col" style="width: 200px;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tabla-archivos-body">
+                                                    <tr>
+                                                        <td>CONTRATO ALQUILER</td>
+                                                        <td>SEBASTIAN URUETA</td>
+                                                        <td>04/08/2026 13:39</td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-light border text-primary" data-bs-toggle="modal" data-bs-target="#modalPrevisualizacion"><i class="fas fa-eye"></i> Ver</button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>DNI DELANTERO</td>
+                                                        <td>SEBASTIAN URUETA</td>
+                                                        <td>04/08/2026 13:38</td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-light border text-primary" data-bs-toggle="modal" data-bs-target="#modalPrevisualizacion"><i class="fas fa-eye"></i> Ver</button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- VISTA 4: COMERCIALES -->
-                <div id="view-comerciales" class="section-view">
-                    <div class="card border-0 shadow-sm p-4">
-                        <h5 class="fw-bold mb-3">Red Comercial</h5>
-                        <p class="text-muted">Usuarios autorizados en Supabase.</p>
+                    <!-- VISTA 4: AGENDA -->
+                    <div id="view-agenda" class="section-view">
+                        <h4 class="fw-bold mb-4">Agenda y Seguimientos</h4>
+                        <div class="card border-0 shadow-sm p-4">
+                            <p class="text-muted mb-0">No hay eventos pendientes para hoy.</p>
+                        </div>
                     </div>
-                </div>
 
+                    <!-- VISTA 5: COMERCIALES -->
+                    <div id="view-comerciales" class="section-view">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="page-title-box d-flex align-items-center justify-content-between">
+                                    <h4 class="mb-0 fw-bold">Comerciales</h4>
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item"><a href="#">Usuarios</a></li>
+                                        <li class="breadcrumb-item active text-muted">Comerciales</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm">
+                            <div class="table-responsive mb-0">
+                                <table class="table table-bordered align-middle mb-0" style="width: 100%;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 20px;" class="text-center"><input type="checkbox" class="form-check-input"></th>
+                                            <th style="width: 120px;">Comercial</th>
+                                            <th>DNI</th>
+                                            <th>Usuario</th>
+                                            <th>Jefe</th>
+                                            <th>Director Oficina</th>
+                                            <th class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-center"><input type="checkbox" class="form-check-input"></td>
+                                            <td><strong>ADRIANA MONTALVO</strong></td>
+                                            <td>1129569710</td>
+                                            <td><del class="text-danger">adriana.montalvo.baq@nwfg.net<br><small>(TELEOPERADOR)</small></del></td>
+                                            <td>SEBASTIAN URUETA</td>
+                                            <td>No tiene</td>
+                                            <td class="text-center"><a href="#" class="text-primary"><i class="fas fa-eye"></i></a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: FILTROS AVANZADOS (TU ESTRUCTURA ORIGINAL) -->
-    <div id="modal-filter" class="modal fade" tabindex="-1" aria-hidden="true">
+    <!-- MODAL: PREVISUALIZACIÓN DE ARCHIVO -->
+    <div id="modalPrevisualizacion" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-filter me-2"></i>Filtro Avanzado de Contratos</h5>
+                    <h5 class="modal-title fw-bold">Previsualización de archivo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-5">
+                    <i class="fas fa-file-pdf text-danger display-1 mb-3"></i>
+                    <h5>Documento verificado correctamente</h5>
+                    <p class="text-muted">El archivo se encuentra almacenado de manera segura.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="alert('Descargando archivo...')"><i class="fas fa-file-download me-1"></i> Descargar Archivo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FILTRO AVANZADO CONTRATOS -->
+    <div id="contracts-modal-filter" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-filter me-2"></i>Filtro Avanzado</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="form-filter-avanzado" onsubmit="aplicarFiltroAvanzado(event)">
-                        <table class="table table-sm">
+                        <table class="table table-sm filter-fields">
                             <tr>
-                                <th><label for="f-ref">Numero referencia:</label></th>
-                                <td><input type="text" id="f-ref" class="form-control form-control-sm"></td>
+                                <th><label>Numero referencia:</label></th>
+                                <td><input type="text" id="id_numero_referencia" class="form-control form-control-sm"></td>
                             </tr>
                             <tr>
-                                <th><label for="f-cups">CUPS:</label></th>
-                                <td><input type="text" id="f-cups" class="form-control form-control-sm"></td>
+                                <th><label>CUPS:</label></th>
+                                <td><input type="text" id="id_cups" class="form-control form-control-sm"></td>
                             </tr>
                             <tr>
-                                <th><label for="f-tarifa">Tarifa:</label></th>
+                                <th><label>Tarifa:</label></th>
                                 <td>
-                                    <select id="f-tarifa" class="form-select form-select-sm">
-                                        <option value="">---------</option>
+                                    <select id="id_producto__tarifa__codigo" class="form-select form-select-sm">
+                                        <option value="" selected>---------</option>
                                         <option value="2.0TD">2.0TD</option>
                                         <option value="3.0TD">3.0TD</option>
                                         <option value="RL.1">RL.1</option>
@@ -306,23 +550,20 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th><label for="f-estado">Estado:</label></th>
-                                <td>
-                                    <select id="f-estado" class="form-select form-select-sm">
-                                        <option value="">---------</option>
-                                        <option value="PENDIENTE DE SUBIR DOCUMENTACION">PENDIENTE DE SUBIR DOCUMENTACION</option>
-                                        <option value="PENDIENTE DE FIRMA">PENDIENTE DE FIRMA</option>
-                                        <option value="VERIFICADO">VERIFICADO</option>
-                                        <option value="TRAMITADO">TRAMITADO</option>
-                                        <option value="ACTIVO">ACTIVO</option>
-                                        <option value="INCIDENCIA">INCIDENCIA</option>
-                                        <option value="KO VALOR CREDITICIO">KO VALOR CREDITICIO</option>
-                                    </select>
-                                </td>
+                                <th><label>Estado:</label></th>
+                                <td id="container-select-estado"></td>
                             </tr>
                             <tr>
-                                <th><label for="f-cliente">Nombre Cliente:</label></th>
-                                <td><input type="text" id="f-cliente" class="form-control form-control-sm"></td>
+                                <th><label>Nombre Cliente:</label></th>
+                                <td><input type="text" id="id_cliente__nombre" class="form-control form-control-sm"></td>
+                            </tr>
+                            <tr>
+                                <th><label>DNI/CIF Cliente:</label></th>
+                                <td><input type="text" id="id_cliente__dni" class="form-control form-control-sm"></td>
+                            </tr>
+                            <tr>
+                                <th><label>Teléfono:</label></th>
+                                <td><input type="text" id="id_cliente__telefono_movil" class="form-control form-control-sm"></td>
                             </tr>
                         </table>
                         <div class="text-center mt-3">
@@ -335,44 +576,102 @@
         </div>
     </div>
 
+    <!-- MODAL: NUEVO CONTRATO -->
+    <div class="modal fade" id="modalNuevoContrato" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Registrar Nuevo Contrato</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form onsubmit="agregarContrato(event)">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Número de Referencia</label>
+                                <input type="text" id="nuevo-ref" class="form-control" placeholder="REF-1004" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CUPS</label>
+                                <input type="text" id="nuevo-cups" class="form-control" placeholder="ES0021..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del Cliente</label>
+                                <input type="text" id="nuevo-cliente" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">DNI / CIF</label>
+                                <input type="text" id="nuevo-dni" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" id="nuevo-telefono" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tarifa</label>
+                                <select id="nuevo-tarifa" class="form-select">
+                                    <option value="2.0TD">2.0TD</option>
+                                    <option value="3.0TD">3.0TD</option>
+                                    <option value="RL.1">RL.1</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Estado Inicial</label>
+                                <select id="nuevo-estado" class="form-select"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Dirección Suministro</label>
+                                <input type="text" id="nuevo-dir" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Contrato</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 
-    <!-- SCRIPT DE SUPABASE Y GESTIÓN DE CONTRATOS -->
+    <!-- SCRIPT DE SUPABASE Y LÓGICA GENERAL -->
     <script>
         const SUPABASE_URL = 'https://ughatbtpnkrrgcfalahz.supabase.co';
-        // IMPORTANTE: Pega aquí tu llave pública "anon" / "public" real
+        // IMPORTANTE: Pega aquí tu llave pública "anon" / "public" real de Supabase
         const SUPABASE_ANON_KEY = 'sb_publishable_DXgx_6-neFL-BpTQLBdFew_XIAizYsQ';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const ESTADOS_CRM = [
-            'PENDIENTE DE SUBIR DOCUMENTACION',
-            'PENDIENTE DE AUTORIZACION',
-            'PENDIENTE DE FIRMA',
-            'PENDIENTE VERIFICACION',
-            'VERIFICADO',
-            'TRAMITADO',
-            'ACTIVO',
-            'INCIDENCIA',
-            'INCIDENCIA REPSOL',
-            'KO VALOR CREDITICIO',
-            'CON COMENTARIOS'
+            { label: 'P. subir documentación', estadoFiltro: 'PENDIENTE DE SUBIR DOCUMENTACION', icon: 'fas fa-file-import', css: 'state-subir-documentacion' },
+            { label: 'P. Autorización', estadoFiltro: 'PENDIENTE DE AUTORIZACION', icon: 'fas fa-user-clock', css: 'state-autorizacion' },
+            { label: 'P. Firma', estadoFiltro: 'PENDIENTE DE FIRMA', icon: 'fas fa-signature', css: 'state-firma' },
+            { label: 'Pendiente Verificación', estadoFiltro: 'PENDIENTE VERIFICACION', icon: 'fas fa-spinner fa-spin', css: 'state-verificacion' },
+            { label: 'Verificado', estadoFiltro: 'VERIFICADO', icon: 'fas fa-check', css: 'state-verificado' },
+            { label: 'Tramitado', estadoFiltro: 'TRAMITADO', icon: 'fas fa-check-double', css: 'state-tramitado' },
+            { label: 'Activo', estadoFiltro: 'ACTIVO', icon: 'fas fa-user-check', css: 'state-activo' },
+            { label: 'Incidencia', estadoFiltro: 'INCIDENCIA', icon: 'fas fa-exclamation', css: 'state-incidencia' },
+            { label: 'Incidencia Alternativa', estadoFiltro: 'INCIDENCIA ALTERNATIVA', icon: 'fas fa-exclamation-triangle', css: 'state-incidencia-alternativa' },
+            { label: 'KO valor crediticio', estadoFiltro: 'KO VALOR CREDITICIO', icon: 'fab fa-korvue', css: 'state-ko' },
+            { label: 'Con Comentarios', estadoFiltro: 'CON COMENTARIOS', icon: 'fas fa-comments', css: 'state-comentarios' }
         ];
 
-        let contratos = [
-            { referencia: 'REF-1001', cups: 'ES00210000000001EE', cliente: 'Industrias del Sur S.L.', servicio: '2.0TD', comercial: 'grupoazulcol@gmail.com', estado: 'TRAMITADO' },
-            { referencia: 'REF-1002', cups: 'ES00210000000002FF', cliente: 'Comercializadora Norte', servicio: 'RL.2', comercial: 'grupoazulcol@gmail.com', estado: 'PENDIENTE DE FIRMA' },
-            { referencia: 'REF-1003', cups: 'ES00210000000003GG', cliente: 'Hotel Costa Azul', servicio: '3.0TD', comercial: 'grupoazulcol@gmail.com', estado: 'KO VALOR CREDITICIO' }
+        let contratos = JSON.parse(localStorage.getItem('grupoazul_contratos_v5')) || [
+            { id: 1, referencia: 'REF-1001', cups: 'ES00210000000001EE', cliente: 'Industrias del Sur S.L.', dni: 'B91234567', telefono: '643 528 718', direccion: 'Pol. Ind. La Isla 14, Sevilla', tarifa: '2.0TD', tipo: 'CAMBIO DE COMERCIALIZADORA', comercial: 'grupoazulcol@gmail.com', estado: 'TRAMITADO' },
+            { id: 2, referencia: 'REF-1002', cups: 'ES00210000000002FF', cliente: 'Comercializadora Norte', dni: 'B48998877', telefono: '611 223 344', direccion: 'Avda. Libertad 45, Bilbao', tarifa: 'RL.2', tipo: 'CAMBIO DE COMERCIALIZADORA', comercial: 'grupoazulcol@gmail.com', estado: 'PENDIENTE DE FIRMA' }
         ];
 
         window.addEventListener('DOMContentLoaded', async () => {
-            renderizarDashboard();
-            renderizarTabla(contratos);
+            poblarSelectsEstados();
+            renderizarDashboardEstados();
+            renderizarTablaContratos(contratos);
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                mostrarCRM(session.user.email);
+                conectarUsuario(session.user.email);
             }
         });
 
@@ -393,12 +692,13 @@
                 errorEl.textContent = 'Correo o contraseña incorrectos.';
                 errorEl.style.display = 'block';
             } else {
-                mostrarCRM(data.user.email);
+                conectarUsuario(data.user.email);
             }
         }
 
-        function mostrarCRM(email) {
+        function conectarUsuario(email) {
             document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('user-email-display').textContent = email;
             document.getElementById('sidebar-user-email').textContent = email;
         }
 
@@ -407,101 +707,237 @@
             window.location.reload();
         }
 
-        function verSeccion(idSeccion, linkEl) {
+        function cambiarVista(idVista, linkEl) {
             document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item-link').forEach(a => a.classList.remove('active'));
-            document.getElementById(idSeccion).classList.add('active');
-            if (linkEl) linkEl.classList.add('active');
+            document.querySelectorAll('.nav-item-link').forEach(a => {
+                a.classList.remove('bg-light', 'fw-bold', 'text-primary');
+                a.classList.add('text-secondary');
+            });
 
-            const titulos = {
-                'view-dashboard': 'Dashboard',
-                'view-contratos': 'Contratos',
-                'view-agenda': 'Agenda',
-                'view-comerciales': 'Comerciales'
-            };
-            document.getElementById('header-title').textContent = titulos[idSeccion] || 'CRM Grupo Azul';
+            document.getElementById(idVista).classList.add('active');
+            if (linkEl) {
+                linkEl.classList.add('bg-light', 'fw-bold', 'text-primary');
+                linkEl.classList.remove('text-secondary');
+            }
         }
 
-        function renderizarDashboard() {
+        function poblarSelectsEstados() {
+            document.getElementById('nuevo-estado').innerHTML = ESTADOS_CRM.map(e => `<option value="${e.estadoFiltro}">${e.estadoFiltro}</option>`).join('');
+            
+            const optionsHtml = `<option value="">---------</option>` + ESTADOS_CRM.map(e => `<option value="${e.estadoFiltro}">${e.estadoFiltro}</option>`).join('');
+            const selFiltro = document.createElement('select');
+            selFiltro.id = 'id_estado_filtro';
+            selFiltro.className = 'form-select form-select-sm';
+            selFiltro.innerHTML = optionsHtml;
+            const container = document.getElementById('container-select-estado');
+            if (container) container.appendChild(selFiltro);
+        }
+
+        function renderizarDashboardEstados() {
+            localStorage.setItem('grupoazul_contratos_v5', JSON.stringify(contratos));
             const grid = document.getElementById('grid-estados');
+            if (!grid) return;
             grid.innerHTML = ESTADOS_CRM.map(est => {
-                const count = contratos.filter(c => c.estado === est).length;
+                const total = contratos.filter(c => c.estado === est.estadoFiltro).length;
                 return `
                     <div class="col-6 col-sm-4 col-xl-3">
-                        <div class="state-card" onclick="filtrarPorEstadoDashboard('${est}')">
-                            <div class="state-icon" style="background: #e0f2fe; color: #0284c7;">
-                                <i class="fas fa-file-contract"></i>
+                        <a class="state-card ${est.css}" href="#" onclick="filtrarPorEstadoDashboard('${est.estadoFiltro}')">
+                            <div class="state-icon"><i class="${est.icon}"></i></div>
+                            <div class="state-info">
+                                <div class="state-count">${total}</div>
+                                <div class="state-label">${est.label}</div>
                             </div>
-                            <div>
-                                <div class="state-count">${count}</div>
-                                <div class="state-label">${est}</div>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                 `;
             }).join('');
         }
 
-        function filtrarPorEstadoDashboard(estado) {
-            verSeccion('view-contratos', document.querySelectorAll('.nav-item-link')[1]);
-            const filtrados = contratos.filter(c => c.estado === estado);
-            renderizarTabla(filtrados);
+        function filtrarPorEstadoDashboard(estadoFiltro) {
+            cambiarVista('view-contratos', document.querySelectorAll('.nav-item-link')[1]);
+            const filtrados = contratos.filter(c => c.estado === estadoFiltro);
+            renderizarTablaContratos(filtrados);
         }
 
-        function renderizarTabla(lista) {
-            document.getElementById('contador-resultados').textContent = `${lista.length} contratos`;
+        function renderizarTablaContratos(lista) {
+            const contadorEl = document.getElementById('contador-resultados');
+            if (contadorEl) contadorEl.textContent = `${lista.length} contratos`;
             const tbody = document.getElementById('tabla-contratos-body');
+            if (!tbody) return;
+            
             tbody.innerHTML = lista.map(c => `
                 <tr>
+                    <td class="text-center">
+                        <button type="button" class="btn-expand-row" id="btn-exp-${c.id}" onclick="toggleDetalleContrato(${c.id})" title="Ver detalles">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
                     <td class="fw-bold">${c.referencia}</td>
                     <td><code>${c.cups}</code></td>
-                    <td>${c.cliente}</td>
-                    <td>${c.servicio}</td>
-                    <td>${c.comercial}</td>
                     <td><span class="badge bg-light text-dark border">${c.estado}</span></td>
+                    <td>${c.cliente}</td>
+                    <td><span class="badge bg-secondary">${c.tarifa}</span></td>
+                </tr>
+                <tr id="detalle-row-${c.id}" class="contract-detail-row" style="display: none;">
+                    <td colspan="6">
+                        <div class="detail-box">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <span class="detail-label">DNI / CIF</span>
+                                    <span class="detail-value">${c.dni}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="detail-label">Teléfono</span>
+                                    <span class="detail-value">${c.telefono}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="detail-label">Dirección Suministro</span>
+                                    <span class="detail-value">${c.direccion}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="detail-label">Comercial / Trámite</span>
+                                    <span class="detail-value">${c.comercial} (${c.tipo})</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="detail-label">Cambiar Estado</span>
+                                    <select class="form-select form-select-sm mt-1" style="max-width: 300px;" onchange="cambiarEstadoContrato(${c.id}, this.value)">
+                                        ${ESTADOS_CRM.map(e => `<option value="${e.estadoFiltro}" ${e.estadoFiltro === c.estado ? 'selected' : ''}>${e.estadoFiltro}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             `).join('');
         }
 
+        function toggleDetalleContrato(id) {
+            const fila = document.getElementById(`detalle-row-${id}`);
+            const btn = document.getElementById(`btn-exp-${id}`);
+            if (!fila || !btn) return;
+            const estaOculto = fila.style.display === 'none';
+
+            if (estaOculto) {
+                fila.style.display = 'table-row';
+                btn.classList.add('expanded');
+                btn.innerHTML = '<i class="fas fa-minus"></i>';
+            } else {
+                fila.style.display = 'none';
+                btn.classList.remove('expanded');
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+            }
+        }
+
+        function cambiarEstadoContrato(id, nuevoEstado) {
+            const item = contratos.find(c => c.id === id);
+            if (item) {
+                item.estado = nuevoEstado;
+                renderizarDashboardEstados();
+                renderizarTablaContratos(contratos);
+                toggleDetalleContrato(id);
+            }
+        }
+
         function filtrarContratosRapido() {
-            const campo = document.getElementById('quick-field').value;
-            const valor = document.getElementById('quick-value').value.toLowerCase();
+            const campo = document.getElementById('contracts-quick-field').value;
+            const valor = document.getElementById('contracts-quick-value').value.toLowerCase();
 
             const filtrados = contratos.filter(c => {
                 if (campo === 'referencia') return c.referencia.toLowerCase().includes(valor);
                 if (campo === 'cups') return c.cups.toLowerCase().includes(valor);
-                if (campo === 'cliente') return c.cliente.toLowerCase().includes(valor);
+                if (campo === 'dni') return c.dni.toLowerCase().includes(valor);
+                if (campo === 'telefono') return c.telefono.toLowerCase().includes(valor);
                 return true;
             });
-            renderizarTabla(filtrados);
+            renderizarTablaContratos(filtrados);
         }
 
         function aplicarFiltroAvanzado(e) {
             e.preventDefault();
-            const ref = document.getElementById('f-ref').value.toLowerCase();
-            const cups = document.getElementById('f-cups').value.toLowerCase();
-            const tarifa = document.getElementById('f-tarifa').value;
-            const estado = document.getElementById('f-estado').value;
-            const cliente = document.getElementById('f-cliente').value.toLowerCase();
+            const ref = document.getElementById('id_numero_referencia').value.toLowerCase();
+            const cups = document.getElementById('id_cups').value.toLowerCase();
+            const tarifa = document.getElementById('id_producto__tarifa__codigo').value;
+            const estadoEl = document.getElementById('id_estado_filtro');
+            const estado = estadoEl ? estadoEl.value : '';
+            const cliente = document.getElementById('id_cliente__nombre').value.toLowerCase();
+            const dni = document.getElementById('id_cliente__dni').value.toLowerCase();
+            const tel = document.getElementById('id_cliente__telefono_movil').value.toLowerCase();
 
             const filtrados = contratos.filter(c => {
                 if (ref && !c.referencia.toLowerCase().includes(ref)) return false;
                 if (cups && !c.cups.toLowerCase().includes(cups)) return false;
-                if (tarifa && c.servicio !== tarifa) return false;
+                if (tarifa && c.tarifa !== tarifa) return false;
                 if (estado && c.estado !== estado) return false;
                 if (cliente && !c.cliente.toLowerCase().includes(cliente)) return false;
+                if (dni && !c.dni.toLowerCase().includes(dni)) return false;
+                if (tel && !c.telefono.toLowerCase().includes(tel)) return false;
                 return true;
             });
 
-            renderizarTabla(filtrados);
-            bootstrap.Modal.getInstance(document.getElementById('modal-filter')).hide();
-            verSeccion('view-contratos', document.querySelectorAll('.nav-item-link')[1]);
+            renderizarTablaContratos(filtrados);
+            const modalEl = document.getElementById('contracts-modal-filter');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
         }
 
         function restaurarFiltros() {
-            document.getElementById('form-filter-avanzado').reset();
-            renderizarTabla(contratos);
-            bootstrap.Modal.getInstance(document.getElementById('modal-filter')).hide();
+            const formAvanzado = document.getElementById('form-filter-avanzado');
+            if (formAvanzado) formAvanzado.reset();
+            const quickVal = document.getElementById('contracts-quick-value');
+            if (quickVal) quickVal.value = '';
+            renderizarTablaContratos(contratos);
+            const modalEl = document.getElementById('contracts-modal-filter');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+        }
+
+        function registrarArchivoNuevo(e) {
+            const file = e.target.files[0];
+            const tipoEl = document.getElementById('id_tipo_documento');
+            const tipo = tipoEl ? tipoEl.value : 'DOCUMENTO GENERAL';
+            if (file) {
+                const tbody = document.getElementById('tabla-archivos-body');
+                const fechaActual = new Date().toLocaleString();
+                const usuarioEl = document.getElementById('sidebar-user-email');
+                const usuarioActual = usuarioEl ? usuarioEl.textContent : 'usuario@grupoazul.com';
+
+                if (tbody) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${tipo} (${file.name})</td>
+                            <td>${usuarioActual}</td>
+                            <td>${fechaActual}</td>
+                            <td>
+                                <button class="btn btn-sm btn-light border text-primary" data-bs-toggle="modal" data-bs-target="#modalPrevisualizacion"><i class="fas fa-eye"></i> Ver</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                alert(`Archivo "${file.name}" cargado exitosamente.`);
+            }
+        }
+
+        function agregarContrato(e) {
+            e.preventDefault();
+            contratos.unshift({
+                id: Date.now(),
+                referencia: document.getElementById('nuevo-ref').value,
+                cups: document.getElementById('nuevo-cups').value,
+                cliente: document.getElementById('nuevo-cliente').value,
+                dni: document.getElementById('nuevo-dni').value,
+                telefono: document.getElementById('nuevo-telefono').value,
+                direccion: document.getElementById('nuevo-dir').value,
+                tarifa: document.getElementById('nuevo-tarifa').value,
+                tipo: 'CAMBIO DE COMERCIALIZADORA',
+                comercial: document.getElementById('sidebar-user-email').textContent,
+                estado: document.getElementById('nuevo-estado').value
+            });
+            e.target.reset();
+            const modalEl = document.getElementById('modalNuevoContrato');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+            renderizarDashboardEstados();
+            renderizarTablaContratos(contratos);
         }
     </script>
 </body>
