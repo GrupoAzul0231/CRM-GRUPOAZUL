@@ -4,17 +4,19 @@
     <meta charset="utf-8" />
     <title>CRM - Grupo Azul</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <!-- Librería oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Bootstrap 5 e Iconos FontAwesome desde CDN (para que nunca fallen los estilos) -->
+    
+    <!-- Bootstrap 5 & FontAwesome desde CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --ga-primary: #0056b3;
             --ga-dark: #0b132b;
             --ga-navy: #1c2541;
+            --ga-primary: #0077b6;
             --ga-cyan: #48cae4;
             --ga-bg: #f5f6f8;
         }
@@ -26,7 +28,7 @@
             overflow-x: hidden;
         }
 
-        /* --- PANTALLA DE LOGIN OBLIGATORIA --- */
+        /* --- PANTALLA DE LOGIN OBLIGATORIA CON SUPABASE --- */
         #login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -56,18 +58,12 @@
             color: #fff;
             font-size: 14px;
         }
-        .login-input:focus {
-            outline: none;
-            border-color: var(--ga-cyan);
-        }
+        .login-input:focus { outline: none; border-color: var(--ga-cyan); }
 
         /* --- LAYOUT DEL CRM --- */
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
+        .wrapper { display: flex; min-height: 100vh; }
         .sidebar {
-            width: 250px;
+            width: 260px;
             background: #ffffff;
             border-right: 1px solid #e5e9f2;
             display: flex;
@@ -84,20 +80,12 @@
             font-size: 20px;
             letter-spacing: 0.5px;
         }
-        .sidebar-brand img {
-            max-height: 45px;
-            width: auto;
-        }
-        .nav-list {
-            list-style: none;
-            padding: 15px 0;
-            margin: 0;
-        }
+        .nav-list { list-style: none; padding: 15px 0; margin: 0; }
         .nav-item-link {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 22px;
+            padding: 13px 22px;
             color: #5a6a85;
             text-decoration: none;
             font-weight: 500;
@@ -112,11 +100,7 @@
             font-weight: 600;
         }
 
-        .main-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        .main-area { flex-grow: 1; display: flex; flex-direction: column; }
         .topbar {
             background: #ffffff;
             height: 68px;
@@ -126,41 +110,9 @@
             align-items: center;
             justify-content: space-between;
         }
-        .content-wrap {
-            padding: 28px;
-        }
+        .content-wrap { padding: 28px; }
 
-        /* --- ACCESOS RÁPIDOS --- */
-        .shortcut-card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 18px;
-            border: 1px solid #e5e9f2;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-            text-decoration: none;
-            color: inherit;
-        }
-        .shortcut-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
-        }
-        .shortcut-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            background: #e0f2fe;
-            color: #0284c7;
-        }
-
-        /* --- TARJETAS DE ESTADOS DE CONTRATOS (TU DISEÑO ORIGINAL) --- */
+        /* --- TARJETAS DE ESTADOS --- */
         .state-card {
             background: #fff;
             border-radius: 10px;
@@ -178,26 +130,31 @@
             box-shadow: 0 4px 12px rgba(0,86,179,0.08);
         }
         .state-icon {
-            width: 44px;
-            height: 44px;
+            width: 44px; height: 44px;
             border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .state-count { font-size: 22px; font-weight: 700; color: #1e293b; line-height: 1.1; }
+        .state-label { font-size: 12.5px; color: #64748b; font-weight: 500; margin-top: 2px; }
+
+        /* --- TOOLBAR DE CONTRATOS --- */
+        .contracts-toolbar {
             display: flex;
+            gap: 12px;
             align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e9f2;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-        .state-count {
-            font-size: 22px;
-            font-weight: 700;
-            line-height: 1.1;
-            color: #1e293b;
-        }
-        .state-label {
-            font-size: 12.5px;
-            color: #64748b;
-            font-weight: 500;
-            margin-top: 2px;
+        .contracts-quick-search {
+            display: flex;
+            gap: 8px;
+            flex-grow: 1;
+            max-width: 600px;
         }
 
         .section-view { display: none; }
@@ -209,7 +166,6 @@
     <!-- 1. PANTALLA DE LOGIN OBLIGATORIA CON SUPABASE -->
     <div id="login-overlay">
         <div class="login-card">
-            <!-- Si subes tu logo.png a GitHub, cambia el texto de abajo por: <img src="logo.png" alt="Grupo Azul" style="max-height:60px; margin-bottom:12px;"> -->
             <div style="font-size: 26px; font-weight: 800; color: #48cae4; margin-bottom: 6px;">GRUPO AZUL</div>
             <p style="color: #94a3b8; font-size: 14px; margin-bottom: 24px;">Acceso seguro al CRM Corporativo</p>
             
@@ -232,10 +188,7 @@
     <div class="wrapper">
         <!-- Menú Lateral -->
         <aside class="sidebar">
-            <div class="sidebar-brand">
-                <!-- Cambia por <img src="logo.png" alt="Grupo Azul"> cuando subas tu imagen -->
-                GRUPO AZUL
-            </div>
+            <div class="sidebar-brand">GRUPO AZUL</div>
             <div class="p-3 border-bottom bg-light">
                 <small class="text-muted d-block" style="font-size: 11px;">Usuario conectado:</small>
                 <strong id="sidebar-user-email" style="font-size: 13px; color: #0b132b; word-break: break-all;">...</strong>
@@ -253,69 +206,46 @@
             <header class="topbar">
                 <h5 class="mb-0 fw-bold text-dark" id="header-title">Dashboard</h5>
                 <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoContrato">+ Nuevo Contrato</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</button>
                 </div>
             </header>
 
             <div class="content-wrap">
                 
-                <!-- VISTA 1: DASHBOARD (ACCESOS RÁPIDOS + ESTADOS DE CONTRATOS) -->
+                <!-- VISTA 1: TABLERO / DASHBOARD -->
                 <div id="view-dashboard" class="section-view active">
-                    
-                    <h6 class="fw-bold text-uppercase text-muted mb-3" style="font-size: 12px; letter-spacing: 0.5px;">Accesos rápidos</h6>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3 col-sm-6">
-                            <div class="shortcut-card" onclick="verSeccion('view-contratos', document.querySelectorAll('.nav-item-link')[1])">
-                                <div class="shortcut-icon"><i class="fas fa-file-contract"></i></div>
-                                <div>
-                                    <div class="fw-bold text-dark">Contratos</div>
-                                    <small class="text-muted">Consultar producción</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="shortcut-card" onclick="verSeccion('view-agenda', document.querySelectorAll('.nav-item-link')[2])">
-                                <div class="shortcut-icon" style="background: #ffedd5; color: #ea580c;"><i class="fas fa-calendar-alt"></i></div>
-                                <div>
-                                    <div class="fw-bold text-dark">Agenda</div>
-                                    <small class="text-muted">Tareas y seguimientos</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="shortcut-card" onclick="verSeccion('view-comerciales', document.querySelectorAll('.nav-item-link')[3])">
-                                <div class="shortcut-icon" style="background: #dbeafe; color: #2563eb;"><i class="fas fa-user-tie"></i></div>
-                                <div>
-                                    <div class="fw-bold text-dark">Comerciales</div>
-                                    <small class="text-muted">Gestionar red comercial</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h6 class="fw-bold text-uppercase text-muted mb-3" style="font-size: 12px; letter-spacing: 0.5px;">Estado de los contratos (Haz clic en un estado para filtrar)</h6>
-                    <div class="row g-3" id="grid-estados">
-                        <!-- Se llena automáticamente con los 11 estados de tu CRM -->
-                    </div>
+                    <h6 class="fw-bold text-uppercase text-muted mb-3" style="font-size: 12px;">Estado de los contratos (Haz clic para filtrar)</h6>
+                    <div class="row g-3" id="grid-estados"></div>
                 </div>
 
-                <!-- VISTA 2: LISTADO DE CONTRATOS -->
+                <!-- VISTA 2: CONTRATOS (CON BARRA DE BÚSQUEDA Y FILTRO AVANZADO) -->
                 <div id="view-contratos" class="section-view">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold" id="titulo-filtro-contratos">Todos los Contratos</h6>
-                            <button class="btn btn-sm btn-light" onclick="filtrarPorEstado('TODOS')">Ver todos</button>
+                    <div class="contracts-toolbar">
+                        <div class="contracts-quick-search">
+                            <select class="form-select form-select-sm" id="quick-field" style="max-width: 150px;">
+                                <option value="referencia">Referencia</option>
+                                <option value="cups">CUPS</option>
+                                <option value="cliente">Cliente</option>
+                            </select>
+                            <input class="form-control form-control-sm" id="quick-value" type="search" placeholder="Buscar contrato..." oninput="filtrarContratosRapido()">
                         </div>
+                        <button type="button" class="btn btn-warning btn-sm fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#modal-filter">
+                            <i class="fas fa-filter me-1"></i> Filtros avanzados
+                        </button>
+                        <span class="text-muted ms-auto" id="contador-resultados" style="font-size: 13px;">0 contratos</span>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Ref. / Contrato</th>
+                                        <th>CUPS</th>
                                         <th>Cliente</th>
-                                        <th>Servicio</th>
+                                        <th>Servicio / Tarifa</th>
                                         <th>Comercial</th>
                                         <th>Estado</th>
-                                        <th>Cambiar Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-contratos-body"></tbody>
@@ -328,21 +258,15 @@
                 <div id="view-agenda" class="section-view">
                     <div class="card border-0 shadow-sm p-4">
                         <h5 class="fw-bold mb-3">Agenda y Seguimientos</h5>
-                        <p class="text-muted">No tienes tareas pendientes programadas para hoy.</p>
+                        <p class="text-muted">No hay eventos pendientes programados.</p>
                     </div>
                 </div>
 
                 <!-- VISTA 4: COMERCIALES -->
                 <div id="view-comerciales" class="section-view">
                     <div class="card border-0 shadow-sm p-4">
-                        <h5 class="fw-bold mb-3">Equipo Comercial - Grupo Azul</h5>
-                        <p class="text-muted mb-3">Los usuarios comerciales se gestionan desde el panel de Autenticación de Supabase.</p>
-                        <ul class="list-group">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span id="lista-usuario-actual">admin@grupoazul.com</span>
-                                <span class="badge bg-primary">Activo</span>
-                            </li>
-                        </ul>
+                        <h5 class="fw-bold mb-3">Red Comercial</h5>
+                        <p class="text-muted">Usuarios autorizados en Supabase.</p>
                     </div>
                 </div>
 
@@ -350,34 +274,63 @@
         </div>
     </div>
 
-    <!-- MODAL NUEVO CONTRATO -->
-    <div class="modal fade" id="modalNuevoContrato" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+    <!-- MODAL: FILTROS AVANZADOS (TU ESTRUCTURA ORIGINAL) -->
+    <div id="modal-filter" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Registrar Contrato</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-filter me-2"></i>Filtro Avanzado de Contratos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form onsubmit="agregarContrato(event)">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Nombre del Cliente / Empresa</label>
-                            <input type="text" id="nuevo-cliente" class="form-control" required>
+                <div class="modal-body">
+                    <form id="form-filter-avanzado" onsubmit="aplicarFiltroAvanzado(event)">
+                        <table class="table table-sm">
+                            <tr>
+                                <th><label for="f-ref">Numero referencia:</label></th>
+                                <td><input type="text" id="f-ref" class="form-control form-control-sm"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="f-cups">CUPS:</label></th>
+                                <td><input type="text" id="f-cups" class="form-control form-control-sm"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="f-tarifa">Tarifa:</label></th>
+                                <td>
+                                    <select id="f-tarifa" class="form-select form-select-sm">
+                                        <option value="">---------</option>
+                                        <option value="2.0TD">2.0TD</option>
+                                        <option value="3.0TD">3.0TD</option>
+                                        <option value="RL.1">RL.1</option>
+                                        <option value="RL.2">RL.2</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label for="f-estado">Estado:</label></th>
+                                <td>
+                                    <select id="f-estado" class="form-select form-select-sm">
+                                        <option value="">---------</option>
+                                        <option value="PENDIENTE DE SUBIR DOCUMENTACION">PENDIENTE DE SUBIR DOCUMENTACION</option>
+                                        <option value="PENDIENTE DE FIRMA">PENDIENTE DE FIRMA</option>
+                                        <option value="VERIFICADO">VERIFICADO</option>
+                                        <option value="TRAMITADO">TRAMITADO</option>
+                                        <option value="ACTIVO">ACTIVO</option>
+                                        <option value="INCIDENCIA">INCIDENCIA</option>
+                                        <option value="KO VALOR CREDITICIO">KO VALOR CREDITICIO</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label for="f-cliente">Nombre Cliente:</label></th>
+                                <td><input type="text" id="f-cliente" class="form-control form-control-sm"></td>
+                            </tr>
+                        </table>
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold"><i class="fas fa-filter me-1"></i> Mostrar resultados</button>
+                            <button type="button" class="btn btn-secondary btn-sm px-4 ms-2" onclick="restaurarFiltros()"><i class="fas fa-eraser me-1"></i> Restaurar</button>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Servicio</label>
-                            <input type="text" id="nuevo-servicio" class="form-control" placeholder="Ej. Luz + Gas Pyme" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Estado Inicial</label>
-                            <select id="nuevo-estado" class="form-select"></select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Contrato</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -385,41 +338,37 @@
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 
-    <!-- SCRIPT DE SUPABASE Y LÓGICA DEL CRM -->
+    <!-- SCRIPT DE SUPABASE Y GESTIÓN DE CONTRATOS -->
     <script>
         const SUPABASE_URL = 'https://ughatbtpnkrrgcfalahz.supabase.co';
-        // IMPORTANTE: Pega aquí tu llave pública "anon" / "public" (la que empieza por eyJ... o sb_publishable_...)
+        // IMPORTANTE: Pega aquí tu llave pública "anon" / "public" real
         const SUPABASE_ANON_KEY = 'sb_publishable_DXgx_6-neFL-BpTQLBdFew_XIAizYsQ';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Los 11 estados exactos de tu CRM original
         const ESTADOS_CRM = [
-            { id: 'P. subir documentación', icon: 'fa-file-import', bg: '#e0f2fe', color: '#0284c7' },
-            { id: 'P. Autorización', icon: 'fa-user-clock', bg: '#fef3c7', color: '#d97706' },
-            { id: 'P. Firma', icon: 'fa-signature', bg: '#ede9fe', color: '#7c3aed' },
-            { id: 'Pendiente Verificación', icon: 'fa-spinner', bg: '#f1f5f9', color: '#475569' },
-            { id: 'Verificado', icon: 'fa-check', bg: '#dcfce7', color: '#16a34a' },
-            { id: 'Tramitado', icon: 'fa-check-double', bg: '#d1fae5', color: '#059669' },
-            { id: 'Activo', icon: 'fa-user-check', bg: '#bbf7d0', color: '#15803d' },
-            { id: 'Incidencia', icon: 'fa-exclamation', bg: '#fee2e2', color: '#dc2626' },
-            { id: 'Incidencia Comercializadora', icon: 'fa-exclamation-triangle', bg: '#ffedd5', color: '#ea580c' },
-            { id: 'KO valor crediticio', icon: 'fa-times-circle', bg: '#fecaca', color: '#991b1b' },
-            { id: 'Con Comentarios', icon: 'fa-comments', bg: '#e0e7ff', color: '#4f46e5' }
+            'PENDIENTE DE SUBIR DOCUMENTACION',
+            'PENDIENTE DE AUTORIZACION',
+            'PENDIENTE DE FIRMA',
+            'PENDIENTE VERIFICACION',
+            'VERIFICADO',
+            'TRAMITADO',
+            'ACTIVO',
+            'INCIDENCIA',
+            'INCIDENCIA REPSOL',
+            'KO VALOR CREDITICIO',
+            'CON COMENTARIOS'
         ];
 
-        let contratos = JSON.parse(localStorage.getItem('grupoazul_contratos')) || [
-            { id: 1, cliente: 'Industrias del Sur S.L.', servicio: 'Suministro Luz', comercial: 'grupoazulcol@gmail.com', estado: 'Tramitado' },
-            { id: 2, cliente: 'Comercializadora Norte', servicio: 'Gas Natural', comercial: 'grupoazulcol@gmail.com', estado: 'Tramitado' },
-            { id: 3, cliente: 'Transportes Rápidos', servicio: 'Tarifa Empresa', comercial: 'grupoazulcol@gmail.com', estado: 'P. Firma' }
+        let contratos = [
+            { referencia: 'REF-1001', cups: 'ES00210000000001EE', cliente: 'Industrias del Sur S.L.', servicio: '2.0TD', comercial: 'grupoazulcol@gmail.com', estado: 'TRAMITADO' },
+            { referencia: 'REF-1002', cups: 'ES00210000000002FF', cliente: 'Comercializadora Norte', servicio: 'RL.2', comercial: 'grupoazulcol@gmail.com', estado: 'PENDIENTE DE FIRMA' },
+            { referencia: 'REF-1003', cups: 'ES00210000000003GG', cliente: 'Hotel Costa Azul', servicio: '3.0TD', comercial: 'grupoazulcol@gmail.com', estado: 'KO VALOR CREDITICIO' }
         ];
 
-        let filtroActual = 'TODOS';
-
-        // Verificar sesión al cargar
         window.addEventListener('DOMContentLoaded', async () => {
-            cargarSelectEstados();
             renderizarDashboard();
+            renderizarTabla(contratos);
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
@@ -438,7 +387,6 @@
             btn.textContent = 'Verificando...';
 
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
             btn.textContent = 'Entrar al CRM';
 
             if (error) {
@@ -452,7 +400,6 @@
         function mostrarCRM(email) {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('sidebar-user-email').textContent = email;
-            document.getElementById('lista-usuario-actual').textContent = email;
         }
 
         async function handleLogout() {
@@ -468,28 +415,26 @@
 
             const titulos = {
                 'view-dashboard': 'Dashboard',
-                'view-contratos': 'Gestión de Contratos',
+                'view-contratos': 'Contratos',
                 'view-agenda': 'Agenda',
                 'view-comerciales': 'Comerciales'
             };
             document.getElementById('header-title').textContent = titulos[idSeccion] || 'CRM Grupo Azul';
-            if (idSeccion === 'view-contratos') renderizarTablaContratos();
         }
 
         function renderizarDashboard() {
-            localStorage.setItem('grupoazul_contratos', JSON.stringify(contratos));
             const grid = document.getElementById('grid-estados');
             grid.innerHTML = ESTADOS_CRM.map(est => {
-                const count = contratos.filter(c => c.estado === est.id).length;
+                const count = contratos.filter(c => c.estado === est).length;
                 return `
                     <div class="col-6 col-sm-4 col-xl-3">
-                        <div class="state-card" onclick="filtrarPorEstado('${est.id}')">
-                            <div class="state-icon" style="background: ${est.bg}; color: ${est.color};">
-                                <i class="fas ${est.icon}"></i>
+                        <div class="state-card" onclick="filtrarPorEstadoDashboard('${est}')">
+                            <div class="state-icon" style="background: #e0f2fe; color: #0284c7;">
+                                <i class="fas fa-file-contract"></i>
                             </div>
                             <div>
                                 <div class="state-count">${count}</div>
-                                <div class="state-label">${est.id}</div>
+                                <div class="state-label">${est}</div>
                             </div>
                         </div>
                     </div>
@@ -497,62 +442,66 @@
             }).join('');
         }
 
-        function filtrarPorEstado(estado) {
-            filtroActual = estado;
+        function filtrarPorEstadoDashboard(estado) {
             verSeccion('view-contratos', document.querySelectorAll('.nav-item-link')[1]);
+            const filtrados = contratos.filter(c => c.estado === estado);
+            renderizarTabla(filtrados);
         }
 
-        function renderizarTablaContratos() {
-            const lista = filtroActual === 'TODOS'
-                ? contratos
-                : contratos.filter(c => c.estado === filtroActual);
-
-            document.getElementById('titulo-filtro-contratos').textContent =
-                filtroActual === 'TODOS' ? 'Todos los Contratos' : `Contratos en estado: ${filtroActual}`;
-
+        function renderizarTabla(lista) {
+            document.getElementById('contador-resultados').textContent = `${lista.length} contratos`;
             const tbody = document.getElementById('tabla-contratos-body');
             tbody.innerHTML = lista.map(c => `
                 <tr>
-                    <td class="fw-bold">${c.cliente}</td>
+                    <td class="fw-bold">${c.referencia}</td>
+                    <td><code>${c.cups}</code></td>
+                    <td>${c.cliente}</td>
                     <td>${c.servicio}</td>
                     <td>${c.comercial}</td>
                     <td><span class="badge bg-light text-dark border">${c.estado}</span></td>
-                    <td>
-                        <select class="form-select form-select-sm" style="max-width: 200px;" onchange="cambiarEstado(${c.id}, this.value)">
-                            ${ESTADOS_CRM.map(e => `<option value="${e.id}" ${e.id === c.estado ? 'selected' : ''}>${e.id}</option>`).join('')}
-                        </select>
-                    </td>
                 </tr>
             `).join('');
         }
 
-        function cambiarEstado(id, nuevoEstado) {
-            const item = contratos.find(c => c.id === id);
-            if (item) {
-                item.estado = nuevoEstado;
-                renderizarDashboard();
-                renderizarTablaContratos();
-            }
-        }
+        function filtrarContratosRapido() {
+            const campo = document.getElementById('quick-field').value;
+            const valor = document.getElementById('quick-value').value.toLowerCase();
 
-        function cargarSelectEstados() {
-            const sel = document.getElementById('nuevo-estado');
-            sel.innerHTML = ESTADOS_CRM.map(e => `<option value="${e.id}">${e.id}</option>`).join('');
-        }
-
-        function agregarContrato(e) {
-            e.preventDefault();
-            contratos.unshift({
-                id: Date.now(),
-                cliente: document.getElementById('nuevo-cliente').value,
-                servicio: document.getElementById('nuevo-servicio').value,
-                comercial: document.getElementById('sidebar-user-email').textContent,
-                estado: document.getElementById('nuevo-estado').value
+            const filtrados = contratos.filter(c => {
+                if (campo === 'referencia') return c.referencia.toLowerCase().includes(valor);
+                if (campo === 'cups') return c.cups.toLowerCase().includes(valor);
+                if (campo === 'cliente') return c.cliente.toLowerCase().includes(valor);
+                return true;
             });
-            e.target.reset();
-            bootstrap.Modal.getInstance(document.getElementById('modalNuevoContrato')).hide();
-            renderizarDashboard();
-            renderizarTablaContratos();
+            renderizarTabla(filtrados);
+        }
+
+        function aplicarFiltroAvanzado(e) {
+            e.preventDefault();
+            const ref = document.getElementById('f-ref').value.toLowerCase();
+            const cups = document.getElementById('f-cups').value.toLowerCase();
+            const tarifa = document.getElementById('f-tarifa').value;
+            const estado = document.getElementById('f-estado').value;
+            const cliente = document.getElementById('f-cliente').value.toLowerCase();
+
+            const filtrados = contratos.filter(c => {
+                if (ref && !c.referencia.toLowerCase().includes(ref)) return false;
+                if (cups && !c.cups.toLowerCase().includes(cups)) return false;
+                if (tarifa && c.servicio !== tarifa) return false;
+                if (estado && c.estado !== estado) return false;
+                if (cliente && !c.cliente.toLowerCase().includes(cliente)) return false;
+                return true;
+            });
+
+            renderizarTabla(filtrados);
+            bootstrap.Modal.getInstance(document.getElementById('modal-filter')).hide();
+            verSeccion('view-contratos', document.querySelectorAll('.nav-item-link')[1]);
+        }
+
+        function restaurarFiltros() {
+            document.getElementById('form-filter-avanzado').reset();
+            renderizarTabla(contratos);
+            bootstrap.Modal.getInstance(document.getElementById('modal-filter')).hide();
         }
     </script>
 </body>
