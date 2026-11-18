@@ -1,0 +1,162 @@
+[index.html](https://github.com/user-attachments/files/35055603/index.html)
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Grupo Azul</title>
+    <!-- Librería oficial de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Estilos del Panel Principal del CRM */
+        .sidebar { width: 260px; background-color: #0b132b; color: white; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; background-color: #1c2541; font-size: 20px; font-weight: bold; color: #48cae4; text-align: center; border-bottom: 1px solid #2b3a67; }
+        .sidebar-menu { list-style: none; padding: 20px 0; flex-grow: 1; }
+        .sidebar-menu li { padding: 12px 20px; cursor: pointer; transition: background 0.2s; color: #8d99ae; }
+        .sidebar-menu li:hover, .sidebar-menu li.active { background-color: #1c2541; color: white; border-left: 4px solid #48cae4; }
+        
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .topbar h1 { font-size: 22px; color: #0b132b; }
+        .logout-btn { background: #ef233c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .logout-btn:hover { background: #d90429; }
+
+        .content-body { padding: 30px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h3 { margin-bottom: 15px; color: #1c2541; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        th { background-color: #f8fafc; color: #475569; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .badge-activo { background: #d1fae5; color: #065f46; }
+        .badge-pendiente { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE LOGIN OBLIGATORIA (BLOQUEO INICIAL) -->
+    <div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b132b; display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background: #1c2541; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: center; color: white;">
+            <h2 style="margin-bottom: 8px; color: #48cae4;">Grupo Azul</h2>
+            <p style="margin-bottom: 24px; color: #8d99ae; font-size: 14px;">Acceso seguro al sistema CRM</p>
+            
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div style="margin-bottom: 16px; text-align: left;">
+                    <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #8d99ae;">Correo electrónico</label>
+                    <input type="email" id="email" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67; background: #0b132b; color: white; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 24px; text-align: left;">
+                    <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #8d99ae;">Contraseña</label>
+                    <input type="password" id="password" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67; background: #0b132b; color: white; box-sizing: border-box;">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 12px; background: #0077b6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">Entrar al CRM</button>
+            </form>
+            
+            <p id="login-error" style="color: #ff4d4d; font-size: 13px; margin-top: 16px; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- ESTRUCTURA PRINCIPAL DEL CRM -->
+    <div class="sidebar">
+        <div class="sidebar-header">Grupo Azul</div>
+        <ul class="sidebar-menu">
+            <li class="active">Panel Principal</li>
+            <li>Clientes</li>
+            <li>Contratos</li>
+            <li>Configuración</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h1>Gestión de Clientes y Contratos</h1>
+            <button class="logout-btn" onclick="handleLogout()">Cerrar Sesión</button>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <h3>Resumen de Actividad</h3>
+                <p>Bienvenido al CRM corporativo de Grupo Azul. Todos los accesos se encuentran protegidos mediante Supabase.</p>
+            </div>
+            
+            <div class="card">
+                <h3>Últimos Contratos Registrados</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Empresa S.A.</td>
+                            <td>Consultoría Integral</td>
+                            <td><span class="badge badge-activo">Activo</span></td>
+                            <td>18/11/2026</td>
+                        </tr>
+                        <tr>
+                            <td>Comercializadora Norte</td>
+                            <td>Suministro Energético</td>
+                            <td><span class="badge badge-pendiente">Pendiente</span></td>
+                            <td>17/11/2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE CONEXIÓN Y SEGURIDAD CON SUPABASE -->
+    <script>
+        // Credenciales configuradas para Grupo Azul
+        const SUPABASE_URL = 'https://ughatbtpnkrrgcfalahz.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_secret_xih6o9k4qXSzg5MKrqzz3Q_cc7gdaiG';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Verificar sesión activa al cargar la página
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+        });
+
+        // Función de inicio de sesión
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+
+            errorElement.style.display = 'none';
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                errorElement.textContent = 'Correo o contraseña incorrectos.';
+                errorElement.style.display = 'block';
+            } else {
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+        }
+
+        // Función para cerrar sesión
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
