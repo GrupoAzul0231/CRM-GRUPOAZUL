@@ -1,0 +1,1798 @@
+[grupo_azul_crm.html](https://github.com/user-attachments/files/35055388/grupo_azul_crm.html)
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grupo Azul — CRM Comercial y Contratos</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              primary: '#0066ff',
+              secondary: '#2563eb',
+              cyan: '#38bdf8',
+              darknavy: '#0b1329',
+              slate: '#f4f6f9'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body
+ <div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b132b; display: flex; justify-content: center; align-items: center; z-index: 9999;">
+    <div style="background: #1c2541; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: center; color: white; font-family: sans-serif;">
+        <h2 style="margin-bottom: 8px; color: #48cae4;">Grupo Azul</h2>
+        <p style="margin-bottom: 24px; color: #8d99ae; font-size: 14px;">Acceso seguro al sistema CRM</p>
+        
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div style="margin-bottom: 16px; text-align: left;">
+                <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #8d99ae;">Correo electrónico</label>
+                <input type="email" id="email" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67; background: #0b132b; color: white; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 24px; text-align: left;">
+                <label style="display: block; font-size: 12px; margin-bottom: 6px; color: #8d99ae;">Contraseña</label>
+                <input type="password" id="password" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2b3a67; background: #0b132b; color: white; box-sizing: border-box;">
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 12px; background: #0077b6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Entrar al CRM</button>
+        </form>
+        
+        <p id="login-error" style="color: #ff4d4d; font-size: 13px; margin-top: 16px; display: none;"></p>
+    </div>
+</div>{
+      background-color: #f4f6f9;
+      color: #1e293b;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .brand-gradient {
+      background: linear-gradient(135deg, #0b1329 0%, #1d4ed8 50%, #0066ff 100%);
+    }
+    .brand-accent-gradient {
+      background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+    }
+    .state-card-transition {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .state-card-transition:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(11, 19, 41, 0.08), 0 8px 10px -6px rgba(11, 19, 41, 0.04);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="min-h-screen flex flex-col lg:flex-row">
+
+    <!-- Mobile Backdrop -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden backdrop-blur-xs"></div>
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#0b1329] text-slate-300 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col justify-between shadow-md">
+      <div>
+        <!-- Brand Logo -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800/80">
+          <a href="#" onclick="navigate('dashboard'); return false;" class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl brand-accent-gradient flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+              <i class="fas fa-hexagon text-lg"></i>
+            </div>
+            <div>
+              <span class="font-bold text-lg tracking-tight text-white block leading-none">GRUPO <span class="text-sky-400">AZUL</span></span>
+              <span class="text-[11px] font-medium text-slate-400 tracking-wider uppercase">CRM Comercial</span>
+            </div>
+          </a>
+          <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1">
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Menu Title -->
+        <div class="px-6 pt-6 pb-2">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Menú Principal</p>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="px-3 space-y-1" id="sidebar-nav">
+          <button onclick="navigate('dashboard')" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-white/5 hover:text-white">
+            <i class="fas fa-chart-pie w-5 text-center text-sky-400"></i>
+            <span>Tablero</span>
+          </button>
+
+          <button onclick="navigate('contratos')" data-nav="contratos" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-white/5 hover:text-white">
+            <div class="flex items-center gap-3">
+              <i class="fas fa-file-contract w-5 text-center text-sky-400"></i>
+              <span>Contratos</span>
+            </div>
+            <span id="nav-contratos-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-sky-300">0</span>
+          </button>
+
+          <button onclick="navigate('clientes')" data-nav="clientes" id="menu-clientes" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-white/5 hover:text-white">
+            <div class="flex items-center gap-3">
+              <i class="fas fa-address-book w-5 text-center text-sky-400"></i>
+              <span>Clientes</span>
+            </div>
+            <span id="nav-clientes-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-sky-300">0</span>
+          </button>
+
+          <div class="px-3 pt-5 pb-2" id="menu-admin-header">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Organización</p>
+          </div>
+
+          <button onclick="navigate('equipos')" data-nav="equipos" id="menu-equipos" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-white/5 hover:text-white">
+            <i class="fas fa-sitemap w-5 text-center text-sky-400"></i>
+            <span>Equipos y Jerarquías</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Bottom Info Card -->
+      <div class="p-4 m-3 rounded-2xl bg-white/5 border border-white/10">
+        <div class="flex items-center gap-2.5 mb-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-semibold text-white">Visibilidad Activa</span>
+        </div>
+        <p id="sidebar-scope-text" class="text-xs text-slate-400 leading-relaxed">
+          Viendo todos los contratos de la organización.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- Top Header -->
+      <header class="h-16 bg-white border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+            <i class="fas fa-bars text-lg"></i>
+          </button>
+          <div class="hidden sm:flex items-center gap-2 text-sm text-slate-500">
+            <span>Grupo Azul CRM</span>
+            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+            <span id="header-breadcrumb" class="font-semibold text-slate-800">Tablero</span>
+          </div>
+        </div>
+
+        <!-- Right Controls: Role Simulator & User Profile -->
+        <div class="flex items-center gap-3 sm:gap-4">
+          <!-- Role / User Switcher for testing Hierarchy & Permissions -->
+          <div class="flex items-center gap-2 bg-blue-50/90 border border-blue-200 px-3 py-1.5 rounded-xl">
+            <i class="fas fa-user-shield text-blue-600 text-xs"></i>
+            <label for="active-user-select" class="text-xs font-medium text-blue-900 hidden md:inline">Simular vista como:</label>
+            <select id="active-user-select" onchange="switchActiveUser(this.value)" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer pr-1">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <!-- Current User Avatar -->
+          <div class="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+            <div id="header-user-avatar" class="w-9 h-9 rounded-full brand-accent-gradient text-white font-bold text-sm flex items-center justify-center shadow-xs">
+              A
+            </div>
+            <div class="hidden md:block text-left">
+              <div id="header-user-name" class="text-xs font-bold text-slate-800 leading-tight">Admin General</div>
+              <div id="header-user-role" class="text-[11px] text-slate-500 leading-tight">Administrador</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Body -->
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1440px] w-full mx-auto">
+
+        <!-- ========================================================= -->
+        <!-- VIEW 1: DASHBOARD -->
+        <!-- ========================================================= -->
+        <section id="view-dashboard" class="space-y-6">
+          
+          <!-- Page Title & Primary CTA -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Grupo Azul</h1>
+              <p class="text-sm text-slate-500 mt-0.5">Resumen operativo de producción y estado de contratos.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button onclick="openClienteModal()" id="btn-dash-new-client" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-sm shadow-xs transition flex items-center gap-2">
+                <i class="fas fa-user-plus text-blue-600"></i>
+                <span>Nuevo Cliente</span>
+              </button>
+              <button onclick="openContratoModal()" id="btn-dash-new-contract" class="px-4 py-2.5 rounded-xl brand-accent-gradient text-white font-semibold text-sm shadow-md shadow-blue-500/20 hover:opacity-95 transition flex items-center gap-2">
+                <i class="fas fa-plus-circle"></i>
+                <span>Cargar Contrato</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Accesos Rápidos Panel -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs">
+            <div class="mb-4">
+              <h2 class="text-base font-bold text-slate-900">Accesos rápidos</h2>
+              <p class="text-xs text-slate-500">Herramientas disponibles según tus permisos y jerarquía.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              
+              <button onclick="openContratoModal()" id="shortcut-cargar-contrato" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-blue-50/60 hover:border-blue-200 transition text-left group">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform">
+                  <i class="fas fa-file-upload"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition-colors">Cargar Contrato</div>
+                  <div class="text-xs text-slate-500">Registrar nueva alta</div>
+                </div>
+              </button>
+
+              <button onclick="navigate('contratos')" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-sky-50/60 hover:border-sky-200 transition text-left group">
+                <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform">
+                  <i class="fas fa-file-contract"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-slate-800 group-hover:text-sky-600 transition-colors">Contratos</div>
+                  <div class="text-xs text-slate-500">Consultar y cambiar estados</div>
+                </div>
+              </button>
+
+              <button onclick="navigate('clientes')" id="shortcut-clientes" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-indigo-50/60 hover:border-indigo-200 transition text-left group">
+                <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">Clientes</div>
+                  <div class="text-xs text-slate-500">Base de titulares y CUPS</div>
+                </div>
+              </button>
+
+              <button onclick="navigate('equipos')" id="shortcut-equipos" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-purple-50/60 hover:border-purple-200 transition text-left group">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform">
+                  <i class="fas fa-sitemap"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-slate-800 group-hover:text-purple-600 transition-colors">Equipos y Permisos</div>
+                  <div class="text-xs text-slate-500">Jerarquías y visibilidad</div>
+                </div>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- Estado de los Contratos Grid -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">Estado de los contratos</h2>
+                <p class="text-xs text-slate-500">Haz clic en cualquier tarjeta para abrir y gestionar los contratos en ese estado.</p>
+              </div>
+              <div class="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg self-start sm:self-auto">
+                Total visible: <span id="dashboard-total-contracts" class="text-slate-900 font-bold">0</span> contratos
+              </div>
+            </div>
+
+            <!-- Cards Container -->
+            <div id="dashboard-states-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 2: CONTRATOS (CARGA Y CAMBIO DE ESTADOS) -->
+        <!-- ========================================================= -->
+        <section id="view-contratos" class="hidden space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Contratos</h1>
+                <span id="contratos-active-state-pill" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                  <span id="contratos-active-state-text">Estado</span>
+                  <button onclick="clearSelectedState()" class="hover:text-blue-950 ml-1" title="Ver todos">
+                    <i class="fas fa-times-circle"></i>
+                  </button>
+                </span>
+              </div>
+              <p class="text-sm text-slate-500 mt-0.5">Gestiona la producción, revisa documentación y actualiza los estados directamente.</p>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+              <button id="btn-show-all-contracts" onclick="clearSelectedState()" class="hidden px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-sm transition">
+                Ver todos
+              </button>
+              <button onclick="openContratoModal()" id="btn-contracts-new" class="px-4 py-2.5 rounded-xl brand-accent-gradient text-white font-semibold text-sm shadow-md shadow-blue-500/20 hover:opacity-95 transition flex items-center gap-2">
+                <i class="fas fa-plus"></i>
+                <span>Cargar Contrato</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Status Pills Bar -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1" id="contratos-status-bar">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Contracts Table Card -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th class="py-3.5 px-4">Ref / Fecha</th>
+                    <th class="py-3.5 px-4">Cliente / Titular</th>
+                    <th class="py-3.5 px-4">CUPS / Tarifa</th>
+                    <th class="py-3.5 px-4">Comercial / Equipo</th>
+                    <th class="py-3.5 px-4">Documentación</th>
+                    <th class="py-3.5 px-4">Estado del Contrato</th>
+                    <th class="py-3.5 px-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="contratos-table-body" class="divide-y divide-slate-100 text-sm">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="contratos-empty-state" class="hidden py-14 px-4 text-center">
+              <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-2xl mx-auto mb-3">
+                <i class="fas fa-folder-open"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-800">No hay contratos en esta vista</h3>
+              <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">Carga un nuevo contrato o selecciona otro estado para visualizar los registros disponibles para tu usuario.</p>
+              <button onclick="openContratoModal()" class="px-4 py-2 rounded-xl brand-accent-gradient text-white text-xs font-semibold shadow-xs">
+                + Cargar primer contrato
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 3: CLIENTES -->
+        <!-- ========================================================= -->
+        <section id="view-clientes" class="hidden space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Clientes</h1>
+              <p class="text-sm text-slate-500 mt-0.5">Directorio de titulares y empresas registradas en el sistema.</p>
+            </div>
+            <button onclick="openClienteModal()" id="btn-clients-new" class="px-4 py-2.5 rounded-xl brand-accent-gradient text-white font-semibold text-sm shadow-md shadow-blue-500/20 hover:opacity-95 transition flex items-center gap-2 self-start sm:self-auto">
+              <i class="fas fa-user-plus"></i>
+              <span>Crear Nuevo Cliente</span>
+            </button>
+          </div>
+
+          <!-- Clients Grid / Table -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th class="py-3.5 px-4">Cliente / Razón Social</th>
+                    <th class="py-3.5 px-4">NIF / CIF / Doc</th>
+                    <th class="py-3.5 px-4">Contacto</th>
+                    <th class="py-3.5 px-4">Dirección Suministro</th>
+                    <th class="py-3.5 px-4">Comercial Asignado</th>
+                    <th class="py-3.5 px-4 text-right">Contratos</th>
+                  </tr>
+                </thead>
+                <tbody id="clientes-table-body" class="divide-y divide-slate-100 text-sm">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 4: EQUIPOS, JERARQUÍAS Y PERMISOS -->
+        <!-- ========================================================= -->
+        <section id="view-equipos" class="hidden space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Equipos, Jerarquías y Permisos</h1>
+              <p class="text-sm text-slate-500 mt-0.5">Define la estructura de equipos, asigna comerciales y controla qué puede ver y hacer cada rol o usuario.</p>
+            </div>
+            <div class="flex flex-wrap gap-2.5">
+              <button onclick="openUsuarioModal()" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-sm shadow-xs transition flex items-center gap-2">
+                <i class="fas fa-user-tie text-slate-500"></i>
+                <span>Nuevo Usuario / Comercial</span>
+              </button>
+              <button onclick="openEquipoModal()" class="px-4 py-2.5 rounded-xl brand-accent-gradient text-white font-semibold text-sm shadow-md shadow-blue-500/20 hover:opacity-95 transition flex items-center gap-2">
+                <i class="fas fa-users-cog"></i>
+                <span>Crear Equipo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hierarchy Visual Explanation Banner -->
+          <div class="bg-[#0b1329] text-white rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm border border-slate-800">
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-sky-400 shrink-0 mt-0.5">
+                <i class="fas fa-layer-group text-lg"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm">Estructura Jerárquica Activa</h3>
+                <p class="text-xs text-slate-300 mt-0.5">
+                  <span class="text-sky-400 font-semibold">1. Administrador General</span> (Acceso total) &rarr; 
+                  <span class="text-blue-400 font-semibold">2. Jefe de Equipo</span> (Supervisa su equipo) &rarr; 
+                  <span class="text-indigo-400 font-semibold">3. Comercial</span> (Gestiona sus clientes y altas).
+                </p>
+              </div>
+            </div>
+            <div class="text-xs bg-white/10 px-3 py-2 rounded-xl text-slate-200 shrink-0 border border-white/10">
+              <i class="fas fa-lightbulb text-sky-400 mr-1.5"></i>
+              Usa el selector superior <strong>"Simular vista como"</strong> para probar los permisos al instante.
+            </div>
+          </div>
+
+          <!-- Teams Cards Grid -->
+          <div>
+            <h2 class="text-base font-bold text-slate-900 mb-3">Equipos Comerciales</h2>
+            <div id="equipos-cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Users & Granular Permissions Matrix -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">Control de Visibilidad y Permisos por Usuario</h2>
+                <p class="text-xs text-slate-500">Configura qué información puede visualizar y modificar cada miembro de la jerarquía.</p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th class="py-3.5 px-4">Usuario</th>
+                    <th class="py-3.5 px-4">Jerarquía / Rol</th>
+                    <th class="py-3.5 px-4">Equipo Asignado</th>
+                    <th class="py-3.5 px-4">Alcance de Visibilidad (Qué puede ver)</th>
+                    <th class="py-3.5 px-4 text-center">Cambiar Estados</th>
+                    <th class="py-3.5 px-4 text-center">Crear Clientes</th>
+                    <th class="py-3.5 px-4 text-center">Gestionar Equipos</th>
+                  </tr>
+                </thead>
+                <tbody id="usuarios-permissions-body" class="divide-y divide-slate-100 text-sm">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 1: CARGAR NUEVO CONTRATO -->
+  <!-- ========================================================= -->
+  <div id="modal-contrato" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg brand-accent-gradient text-white flex items-center justify-center text-sm">
+            <i class="fas fa-file-signature"></i>
+          </div>
+          <h3 class="font-bold text-slate-900">Cargar Nuevo Contrato</h3>
+        </div>
+        <button onclick="closeModal('modal-contrato')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-contrato" onsubmit="handleSaveContrato(event)" class="p-6 overflow-y-auto space-y-4">
+        
+        <!-- Selección de Cliente o Creación Rápida -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/70 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-600">1. Datos del Cliente / Titular</label>
+            <button type="button" onclick="toggleQuickClientFields()" id="btn-toggle-quick-client" class="text-xs font-semibold text-blue-600 hover:underline">
+              + Crear cliente nuevo aquí
+            </button>
+          </div>
+
+          <div id="existing-client-selector">
+            <select id="contrato-cliente-id" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-600">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <!-- Campos rápidos si decide crear cliente en el acto -->
+          <div id="quick-client-fields" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Nombre / Razón Social *</label>
+              <input type="text" id="quick-cliente-nombre" placeholder="Ej. Panadería San José SL" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">NIF / CIF *</label>
+              <input type="text" id="quick-cliente-nif" placeholder="Ej. B12345678" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Teléfono *</label>
+              <input type="text" id="quick-cliente-telefono" placeholder="Ej. 600 123 456" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Dirección de Suministro</label>
+              <input type="text" id="quick-cliente-direccion" placeholder="Calle Mayor 12, Madrid" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-600">
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos Técnicos del Suministro -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Código CUPS / Referencia Suministro *</label>
+            <input type="text" id="contrato-cups" required placeholder="ES0021000008493821XX" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono uppercase focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tarifa / Producto *</label>
+            <select id="contrato-tarifa" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-600">
+              <option value="Luz Ahorro Plus 2.0TD">Luz Ahorro Plus 2.0TD</option>
+              <option value="Dual Luz + Gas Óptima">Dual Luz + Gas Óptima</option>
+              <option value="Tarifa Empresas 3.0TD">Tarifa Empresas 3.0TD</option>
+              <option value="Tarifa Plana Hogar">Tarifa Plana Hogar</option>
+              <option value="Gas Natural Negocios">Gas Natural Negocios</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Estado Inicial *</label>
+            <select id="contrato-estado" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-600">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Comercial Responsable *</label>
+            <select id="contrato-comercial-id" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-600">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Documentación Adjunta -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Documentación Adjuntada en la Carga</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="doc-dni" checked class="rounded text-blue-600 focus:ring-blue-600 w-4 h-4">
+              <span class="text-xs font-medium text-slate-700"><i class="fas fa-id-card text-slate-400 mr-1"></i> DNI / CIF</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="doc-factura" checked class="rounded text-blue-600 focus:ring-blue-600 w-4 h-4">
+              <span class="text-xs font-medium text-slate-700"><i class="fas fa-file-invoice text-slate-400 mr-1"></i> Última Factura</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="doc-contrato" class="rounded text-blue-600 focus:ring-blue-600 w-4 h-4">
+              <span class="text-xs font-medium text-slate-700"><i class="fas fa-signature text-slate-400 mr-1"></i> Contrato Firmado</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Observaciones / Comentarios</label>
+          <textarea id="contrato-comentario" rows="2" placeholder="Notas sobre potencia contratada, horario de llamada o incidencias..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-contrato')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl brand-accent-gradient text-white text-sm font-semibold shadow-md shadow-blue-500/20 hover:opacity-95">Guardar Contrato</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 2: CREAR NUEVO CLIENTE -->
+  <!-- ========================================================= -->
+  <div id="modal-cliente" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <h3 class="font-bold text-slate-900">Crear Nuevo Cliente</h3>
+        </div>
+        <button onclick="closeModal('modal-cliente')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-cliente" onsubmit="handleSaveCliente(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo o Razón Social *</label>
+          <input type="text" id="cliente-nombre" required placeholder="Ej. Carlos Mendoza / Industrias Sol S.L." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">NIF / CIF / Documento *</label>
+            <input type="text" id="cliente-nif" required placeholder="Ej. 48291034K" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm uppercase focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono *</label>
+            <input type="tel" id="cliente-telefono" required placeholder="Ej. 643 528 718" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-600">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
+          <input type="email" id="cliente-email" placeholder="cliente@empresa.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Dirección de Suministro *</label>
+          <input type="text" id="cliente-direccion" required placeholder="Av. de América 45, 28002 Madrid" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Comercial Asignado *</label>
+          <select id="cliente-comercial-id" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-600">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-cliente')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-md shadow-blue-600/20 hover:bg-blue-700">Guardar Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 3: CREAR EQUIPO COMERCIAL -->
+  <!-- ========================================================= -->
+  <div id="modal-equipo" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center text-sm">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3 class="font-bold text-slate-900">Crear Equipo Comercial</h3>
+        </div>
+        <button onclick="closeModal('modal-equipo')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveEquipo(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre del Equipo *</label>
+          <input type="text" id="equipo-nombre" required placeholder="Ej. Equipo Zona Norte / Call Center" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-purple-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Descripción / Zona</label>
+          <input type="text" id="equipo-descripcion" placeholder="Ej. Captación Pymes y Residencial" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-purple-600">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-equipo')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-semibold shadow-md shadow-purple-600/20 hover:bg-purple-700">Crear Equipo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 4: CREAR USUARIO / JERARQUÍA -->
+  <!-- ========================================================= -->
+  <div id="modal-usuario" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-white flex items-center justify-center text-sm">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <h3 class="font-bold text-slate-900">Añadir Usuario a la Jerarquía</h3>
+        </div>
+        <button onclick="closeModal('modal-usuario')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveUsuario(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo *</label>
+          <input type="text" id="usuario-nombre" required placeholder="Ej. Laura Gómez" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-slate-800">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico *</label>
+          <input type="email" id="usuario-email" required placeholder="laura@empresa.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-slate-800">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nivel Jerárquico *</label>
+            <select id="usuario-rol" required onchange="autoSelectScopeByRole()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-slate-800">
+              <option value="COMERCIAL">Comercial</option>
+              <option value="JEFE_EQUIPO">Jefe de Equipo</option>
+              <option value="ADMIN">Administrador General</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Equipo Asignado *</label>
+            <select id="usuario-equipo-id" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-slate-800">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">¿Qué puede ver este usuario? (Visibilidad) *</label>
+          <select id="usuario-scope" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-slate-800">
+            <option value="OWN">Solo sus propios contratos y clientes</option>
+            <option value="TEAM">Todos los contratos de su Equipo</option>
+            <option value="ALL">Toda la empresa (Global)</option>
+          </select>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-usuario')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800">Guardar Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 5: DETALLE Y COMENTARIOS DEL CONTRATO -->
+  <!-- ========================================================= -->
+  <div id="modal-detalle-contrato" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <span id="detalle-ref" class="text-xs font-bold text-blue-600 uppercase tracking-wider">CTR-001</span>
+          <h3 id="detalle-cliente" class="font-bold text-slate-900 text-base">Nombre Cliente</h3>
+        </div>
+        <button onclick="closeModal('modal-detalle-contrato')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl text-xs">
+          <div>
+            <span class="text-slate-400 block">CUPS</span>
+            <span id="detalle-cups" class="font-mono font-bold text-slate-800">ES0021...</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block">Tarifa</span>
+            <span id="detalle-tarifa" class="font-semibold text-slate-800">Luz Ahorro Plus</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block">Comercial</span>
+            <span id="detalle-comercial" class="font-semibold text-slate-800">Juan Pérez</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block">Estado Actual</span>
+            <span id="detalle-estado" class="font-bold text-blue-600">TRAMITADO</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Historial / Notas del Contrato</label>
+          <div id="detalle-comentarios-list" class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2 text-xs text-slate-700">
+            <!-- Comments injected here -->
+          </div>
+        </div>
+
+        <form onsubmit="handleAddComentario(event)" class="flex gap-2">
+          <input type="hidden" id="detalle-contrato-id">
+          <input type="text" id="nuevo-comentario-input" required placeholder="Escribir nota o actualización..." class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
+          <button type="submit" class="px-4 py-2 rounded-xl brand-accent-gradient text-white text-sm font-semibold hover:opacity-95">Añadir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <!-- ========================================================= -->
+  <script>
+    // 1. DEFINICIÓN DE ESTADOS DEL CRM (Mantenemos los colores de estado intactos, renombrado Repsol a Proveedor)
+    const CONTRACT_STATES = [
+      { id: 'PENDIENTE DE SUBIR DOCUMENTACION', label: 'P. subir documentación', icon: 'fa-file-import', color: 'amber', border: 'border-l-amber-500', bgIcon: 'bg-amber-100 text-amber-600', badge: 'bg-amber-100 text-amber-800' },
+      { id: 'PENDIENTE DE AUTORIZACION', label: 'P. Autorización', icon: 'fa-user-clock', color: 'orange', border: 'border-l-orange-500', bgIcon: 'bg-orange-100 text-orange-600', badge: 'bg-orange-100 text-orange-800' },
+      { id: 'PENDIENTE DE FIRMA', label: 'P. Firma', icon: 'fa-signature', color: 'indigo', border: 'border-l-indigo-500', bgIcon: 'bg-indigo-100 text-indigo-600', badge: 'bg-indigo-100 text-indigo-800' },
+      { id: 'PENDIENTE VERIFICACION', label: 'Pendiente Verificación', icon: 'fa-spinner', color: 'sky', border: 'border-l-sky-500', bgIcon: 'bg-sky-100 text-sky-600', badge: 'bg-sky-100 text-sky-800' },
+      { id: 'VERIFICADO', label: 'Verificado', icon: 'fa-check', color: 'teal', border: 'border-l-teal-500', bgIcon: 'bg-teal-100 text-teal-600', badge: 'bg-teal-100 text-teal-800' },
+      { id: 'TRAMITADO', label: 'Tramitado', icon: 'fa-check-double', color: 'blue', border: 'border-l-blue-600', bgIcon: 'bg-blue-100 text-blue-600', badge: 'bg-blue-100 text-blue-800' },
+      { id: 'ACTIVO', label: 'Activo', icon: 'fa-user-check', color: 'emerald', border: 'border-l-emerald-500', bgIcon: 'bg-emerald-100 text-emerald-600', badge: 'bg-emerald-100 text-emerald-800' },
+      { id: 'INCIDENCIA', label: 'Incidencia', icon: 'fa-exclamation', color: 'rose', border: 'border-l-rose-500', bgIcon: 'bg-rose-100 text-rose-600', badge: 'bg-rose-100 text-rose-800' },
+      { id: 'INCIDENCIA PROVEEDOR', label: 'Incidencia Proveedor', icon: 'fa-exclamation-triangle', color: 'red', border: 'border-l-red-600', bgIcon: 'bg-red-100 text-red-600', badge: 'bg-red-100 text-red-800' },
+      { id: 'KO VALOR CREDITICIO', label: 'KO valor crediticio', icon: 'fa-ban', color: 'slate', border: 'border-l-slate-700', bgIcon: 'bg-slate-200 text-slate-700', badge: 'bg-slate-200 text-slate-800' },
+      { id: 'CON COMENTARIOS', label: 'Con Comentarios', icon: 'fa-comments', color: 'purple', border: 'border-l-purple-500', bgIcon: 'bg-purple-100 text-purple-600', badge: 'bg-purple-100 text-purple-800' }
+    ];
+
+    // 2. ESTADO INICIAL / DATOS DE EJEMPLO
+    const DEFAULT_DATA = {
+      equipos: [
+        { id: 'eq-1', nombre: 'Dirección Grupo Azul', descripcion: 'Administración y control global' },
+        { id: 'eq-2', nombre: 'Equipo Comercial Madrid', descripcion: 'Captación residencial y pymes zona centro' },
+        { id: 'eq-3', nombre: 'Call Center Grupo Azul', descripcion: 'Venta telefónica nacional' }
+      ],
+      usuarios: [
+        {
+          id: 'usr-1',
+          nombre: 'Admin General',
+          email: 'grupoazulcol@gmail.com',
+          rol: 'ADMIN',
+          equipoId: 'eq-1',
+          scope: 'ALL',
+          perms: { changeStatus: true, createClient: true, manageTeams: true }
+        },
+        {
+          id: 'usr-2',
+          nombre: 'Carlos Ruiz (Jefe Zona)',
+          email: 'carlos.centro@grupoazul.es',
+          rol: 'JEFE_EQUIPO',
+          equipoId: 'eq-2',
+          scope: 'TEAM',
+          perms: { changeStatus: true, createClient: true, manageTeams: false }
+        },
+        {
+          id: 'usr-3',
+          nombre: 'Elena Martín (Comercial)',
+          email: 'elena.martin@grupoazul.es',
+          rol: 'COMERCIAL',
+          equipoId: 'eq-2',
+          scope: 'OWN',
+          perms: { changeStatus: true, createClient: true, manageTeams: false }
+        },
+        {
+          id: 'usr-4',
+          nombre: 'Javier Torres (Call Center)',
+          email: 'javier.call@grupoazul.es',
+          rol: 'COMERCIAL',
+          equipoId: 'eq-3',
+          scope: 'OWN',
+          perms: { changeStatus: false, createClient: true, manageTeams: false }
+        }
+      ],
+      clientes: [
+        {
+          id: 'cli-1',
+          nombre: 'Restaurante El Mirador S.L.',
+          nif: 'B87451209',
+          telefono: '643 528 718',
+          email: 'administracion@elmirador.es',
+          direccion: 'Paseo de la Castellana 140, Madrid',
+          comercialId: 'usr-3'
+        },
+        {
+          id: 'cli-2',
+          nombre: 'María Fernanda López',
+          nif: '50928371M',
+          telefono: '612 904 331',
+          email: 'mflopez@correo.es',
+          direccion: 'Calle Alcalá 310, 4B, Madrid',
+          comercialId: 'usr-2'
+        },
+        {
+          id: 'cli-3',
+          nombre: 'Talleres Mecánicos del Sur S.A.',
+          nif: 'A28991023',
+          telefono: '699 112 233',
+          email: 'contacto@talleressur.es',
+          direccion: 'Polígono Industrial Cobo Calleja, Nave 4',
+          comercialId: 'usr-4'
+        }
+      ],
+      contratos: [
+        {
+          id: 'CTR-1001',
+          clienteId: 'cli-1',
+          cups: 'ES0021000004918273AB',
+          tarifa: 'Tarifa Empresas 3.0TD',
+          estado: 'TRAMITADO',
+          comercialId: 'usr-3',
+          fecha: '2026-11-15',
+          docs: { dni: true, factura: true, contrato: true },
+          comentarios: ['Documentación verificada y enviada a distribuidora.']
+        },
+        {
+          id: 'CTR-1002',
+          clienteId: 'cli-2',
+          cups: 'ES0022000009182341CD',
+          tarifa: 'Dual Luz + Gas Óptima',
+          estado: 'PENDIENTE DE FIRMA',
+          comercialId: 'usr-2',
+          fecha: '2026-11-17',
+          docs: { dni: true, factura: true, contrato: false },
+          comentarios: ['Enviado enlace de firma OTP al móvil del cliente.']
+        },
+        {
+          id: 'CTR-1003',
+          clienteId: 'cli-3',
+          cups: 'ES0031405000192837EF',
+          tarifa: 'Luz Ahorro Plus 2.0TD',
+          estado: 'KO VALOR CREDITICIO',
+          comercialId: 'usr-4',
+          fecha: '2026-11-18',
+          docs: { dni: true, factura: false, contrato: true },
+          comentarios: ['Rechazado por scoring crediticio. Requiere cambio de titularidad.']
+        },
+        {
+          id: 'CTR-1004',
+          clienteId: 'cli-1',
+          cups: 'ES0021000004918999ZZ',
+          tarifa: 'Gas Natural Negocios',
+          estado: 'PENDIENTE DE SUBIR DOCUMENTACION',
+          comercialId: 'usr-3',
+          fecha: '2026-11-18',
+          docs: { dni: true, factura: false, contrato: false },
+          comentarios: ['Falta adjuntar última factura de gas del local anexo.']
+        }
+      ]
+    };
+
+    // App State
+    let appData = loadAppData();
+    let currentUserId = localStorage.getItem('grupoazul_active_user') || 'usr-1';
+    let currentView = 'dashboard';
+    let selectedStateFilter = null;
+    let quickClientMode = false;
+
+    function loadAppData() {
+      const saved = localStorage.getItem('grupoazul_crm_data_v1');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing storage', e);
+        }
+      }
+      localStorage.setItem('grupoazul_crm_data_v1', JSON.stringify(DEFAULT_DATA));
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    function saveAppData() {
+      localStorage.setItem('grupoazul_crm_data_v1', JSON.stringify(appData));
+    }
+
+    // 3. HELPER FUNCTIONS: JERARQUÍA Y VISIBILIDAD
+    function getCurrentUser() {
+      return appData.usuarios.find(u => u.id === currentUserId) || appData.usuarios[0];
+    }
+
+    function getVisibleContratos() {
+      const user = getCurrentUser();
+      if (user.scope === 'ALL') {
+        return appData.contratos;
+      }
+      if (user.scope === 'TEAM') {
+        const teamUserIds = appData.usuarios
+          .filter(u => u.equipoId === user.equipoId)
+          .map(u => u.id);
+        return appData.contratos.filter(c => teamUserIds.includes(c.comercialId));
+      }
+      return appData.contratos.filter(c => c.comercialId === user.id);
+    }
+
+    function getVisibleClientes() {
+      const user = getCurrentUser();
+      if (user.scope === 'ALL') {
+        return appData.clientes;
+      }
+      if (user.scope === 'TEAM') {
+        const teamUserIds = appData.usuarios
+          .filter(u => u.equipoId === user.equipoId)
+          .map(u => u.id);
+        return appData.clientes.filter(c => teamUserIds.includes(c.comercialId));
+      }
+      return appData.clientes.filter(c => c.comercialId === user.id);
+    }
+
+    function getUserById(id) {
+      return appData.usuarios.find(u => u.id === id) || { nombre: 'Sin asignar', equipoId: '' };
+    }
+
+    function getEquipoById(id) {
+      return appData.equipos.find(e => e.id === id) || { nombre: 'Sin equipo' };
+    }
+
+    function getClienteById(id) {
+      return appData.clientes.find(c => c.id === id) || { nombre: 'Cliente Desconocido', nif: '-', telefono: '-' };
+    }
+
+    function getStateConfig(stateId) {
+      return CONTRACT_STATES.find(s => s.id === stateId) || CONTRACT_STATES[0];
+    }
+
+    // 4. NAVEGACIÓN Y RENDERIZADO GENERAL
+    function navigate(viewName, stateFilter = null) {
+      const user = getCurrentUser();
+      if (viewName === 'equipos' && !user.perms.manageTeams && user.rol !== 'ADMIN') {
+        showToast('No tienes permisos para acceder a Equipos y Jerarquías.', 'error');
+        return;
+      }
+
+      currentView = viewName;
+      selectedStateFilter = stateFilter;
+
+      ['dashboard', 'contratos', 'clientes', 'equipos'].forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+      });
+
+      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        if (btn.dataset.nav === viewName) {
+          btn.classList.add('bg-white/10', 'text-white', 'font-bold');
+          btn.classList.remove('text-slate-300');
+        } else {
+          btn.classList.remove('bg-white/10', 'text-white', 'font-bold');
+          btn.classList.add('text-slate-300');
+        }
+      });
+
+      const titles = {
+        dashboard: 'Tablero',
+        contratos: 'Contratos',
+        clientes: 'Clientes',
+        equipos: 'Equipos y Jerarquías'
+      };
+      document.getElementById('header-breadcrumb').textContent = titles[viewName];
+
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 1024) {
+        toggleSidebar();
+      }
+
+      renderAll();
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      sidebar.classList.toggle('-translate-x-full');
+      backdrop.classList.toggle('hidden');
+    }
+
+    function switchActiveUser(userId) {
+      currentUserId = userId;
+      localStorage.setItem('grupoazul_active_user', userId);
+      const user = getCurrentUser();
+      
+      if (currentView === 'equipos' && !user.perms.manageTeams && user.rol !== 'ADMIN') {
+        navigate('dashboard');
+      } else {
+        renderAll();
+      }
+      showToast(`Vista cambiada a: ${user.nombre}`, 'info');
+    }
+
+    function renderAll() {
+      applyUserPermissionsUI();
+      renderHeaderUserSelector();
+      renderBadges();
+      if (currentView === 'dashboard') renderDashboard();
+      if (currentView === 'contratos') renderContratos();
+      if (currentView === 'clientes') renderClientes();
+      if (currentView === 'equipos') renderEquipos();
+    }
+
+    function applyUserPermissionsUI() {
+      const user = getCurrentUser();
+      const equipo = getEquipoById(user.equipoId);
+
+      document.getElementById('header-user-avatar').textContent = user.nombre.charAt(0).toUpperCase();
+      document.getElementById('header-user-name').textContent = user.nombre;
+      const roleLabels = { ADMIN: 'Administrador General', JEFE_EQUIPO: 'Jefe de Equipo', COMERCIAL: 'Comercial' };
+      document.getElementById('header-user-role').textContent = `${roleLabels[user.rol]} · ${equipo.nombre}`;
+
+      const scopeDescriptions = {
+        ALL: 'Viendo todos los contratos y clientes de la empresa.',
+        TEAM: `Viendo datos completos de: ${equipo.nombre}.`,
+        OWN: 'Viendo únicamente tus contratos y clientes asignados.'
+      };
+      document.getElementById('sidebar-scope-text').textContent = scopeDescriptions[user.scope];
+
+      const canManageTeams = user.perms.manageTeams || user.rol === 'ADMIN';
+      document.getElementById('menu-equipos').classList.toggle('hidden', !canManageTeams);
+      document.getElementById('menu-admin-header').classList.toggle('hidden', !canManageTeams);
+      document.getElementById('shortcut-equipos').classList.toggle('hidden', !canManageTeams);
+
+      const canCreateClient = user.perms.createClient || user.rol === 'ADMIN';
+      document.getElementById('btn-dash-new-client').classList.toggle('hidden', !canCreateClient);
+      document.getElementById('btn-clients-new').classList.toggle('hidden', !canCreateClient);
+    }
+
+    function renderHeaderUserSelector() {
+      const select = document.getElementById('active-user-select');
+      select.innerHTML = appData.usuarios.map(u => {
+        const roleTag = u.rol === 'ADMIN' ? 'Admin' : (u.rol === 'JEFE_EQUIPO' ? 'Jefe Equipo' : 'Comercial');
+        return `<option value="${u.id}" ${u.id === currentUserId ? 'selected' : ''}>${u.nombre} (${roleTag})</option>`;
+      }).join('');
+    }
+
+    function renderBadges() {
+      document.getElementById('nav-contratos-badge').textContent = getVisibleContratos().length;
+      document.getElementById('nav-clientes-badge').textContent = getVisibleClientes().length;
+    }
+
+    // 5. RENDER DASHBOARD
+    function renderDashboard() {
+      const visibleContratos = getVisibleContratos();
+      document.getElementById('dashboard-total-contracts').textContent = visibleContratos.length;
+
+      const grid = document.getElementById('dashboard-states-grid');
+      grid.innerHTML = CONTRACT_STATES.map(state => {
+        const count = visibleContratos.filter(c => c.estado === state.id).length;
+        return `
+          <button onclick="navigate('contratos', '${state.id}')" class="state-card-transition bg-white rounded-xl border border-slate-200/80 border-l-4 ${state.border} p-4 flex items-center gap-4 text-left shadow-xs group">
+            <div class="w-12 h-12 rounded-xl ${state.bgIcon} flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fas ${state.icon} ${state.id === 'PENDIENTE VERIFICACION' && count > 0 ? 'fa-spin' : ''}"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-2xl font-bold text-slate-900 leading-none mb-1">${count}</div>
+              <div class="text-xs font-semibold text-slate-500 truncate">${state.label}</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // 6. RENDER CONTRATOS
+    function clearSelectedState() {
+      selectedStateFilter = null;
+      renderContratos();
+    }
+
+    function renderContratos() {
+      const user = getCurrentUser();
+      const canChangeStatus = user.perms.changeStatus || user.rol === 'ADMIN';
+      const visibleContratos = getVisibleContratos();
+
+      const pill = document.getElementById('contratos-active-state-pill');
+      const btnShowAll = document.getElementById('btn-show-all-contracts');
+      if (selectedStateFilter) {
+        const st = getStateConfig(selectedStateFilter);
+        document.getElementById('contratos-active-state-text').textContent = st.label;
+        pill.classList.remove('hidden');
+        pill.classList.add('inline-flex');
+        btnShowAll.classList.remove('hidden');
+      } else {
+        pill.classList.add('hidden');
+        pill.classList.remove('inline-flex');
+        btnShowAll.classList.add('hidden');
+      }
+
+      const statusBar = document.getElementById('contratos-status-bar');
+      const allCount = visibleContratos.length;
+      let barHtml = `
+        <button onclick="clearSelectedState()" class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${!selectedStateFilter ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+          Todos (${allCount})
+        </button>
+      `;
+      CONTRACT_STATES.forEach(st => {
+        const cnt = visibleContratos.filter(c => c.estado === st.id).length;
+        if (cnt > 0 || selectedStateFilter === st.id) {
+          const isActive = selectedStateFilter === st.id;
+          barHtml += `
+            <button onclick="selectedStateFilter='${st.id}'; renderContratos();" class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${isActive ? 'brand-accent-gradient text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+              ${st.label} (${cnt})
+            </button>
+          `;
+        }
+      });
+      statusBar.innerHTML = barHtml;
+
+      const list = selectedStateFilter
+        ? visibleContratos.filter(c => c.estado === selectedStateFilter)
+        : visibleContratos;
+
+      const tbody = document.getElementById('contratos-table-body');
+      const emptyState = document.getElementById('contratos-empty-state');
+
+      if (list.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      tbody.innerHTML = list.map(c => {
+        const cliente = getClienteById(c.clienteId);
+        const comercial = getUserById(c.comercialId);
+        const equipo = getEquipoById(comercial.equipoId);
+        const stConfig = getStateConfig(c.estado);
+
+        const stateOptions = CONTRACT_STATES.map(s =>
+          `<option value="${s.id}" ${s.id === c.estado ? 'selected' : ''}>${s.label}</option>`
+        ).join('');
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3.5 px-4 align-top">
+              <div class="font-bold text-slate-900 text-xs">${c.id}</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">${c.fecha}</div>
+            </td>
+            <td class="py-3.5 px-4 align-top">
+              <div class="font-semibold text-slate-800">${cliente.nombre}</div>
+              <div class="text-xs text-slate-500">${cliente.nif} · ${cliente.telefono}</div>
+            </td>
+            <td class="py-3.5 px-4 align-top">
+              <div class="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block">${c.cups}</div>
+              <div class="text-xs text-slate-500 mt-1">${c.tarifa}</div>
+            </td>
+            <td class="py-3.5 px-4 align-top">
+              <div class="text-xs font-semibold text-slate-800">${comercial.nombre}</div>
+              <div class="text-[11px] text-slate-500">${equipo.nombre}</div>
+            </td>
+            <td class="py-3.5 px-4 align-top">
+              <div class="flex items-center gap-1.5">
+                <span title="DNI/CIF" class="w-6 h-6 rounded-md text-[11px] flex items-center justify-center ${c.docs?.dni ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}">
+                  <i class="fas fa-id-card"></i>
+                </span>
+                <span title="Factura" class="w-6 h-6 rounded-md text-[11px] flex items-center justify-center ${c.docs?.factura ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}">
+                  <i class="fas fa-file-invoice"></i>
+                </span>
+                <span title="Contrato Firmado" class="w-6 h-6 rounded-md text-[11px] flex items-center justify-center ${c.docs?.contrato ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}">
+                  <i class="fas fa-signature"></i>
+                </span>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 align-top">
+              ${canChangeStatus ? `
+                <select onchange="updateContractState('${c.id}', this.value)" class="text-xs font-bold rounded-xl px-3 py-2 border border-slate-200 ${stConfig.badge} focus:outline-none focus:ring-2 focus:ring-blue-500/30 cursor-pointer">
+                  ${stateOptions}
+                </select>
+              ` : `
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold rounded-xl px-3 py-1.5 ${stConfig.badge}">
+                  <i class="fas ${stConfig.icon}"></i>
+                  ${stConfig.label}
+                </span>
+              `}
+            </td>
+            <td class="py-3.5 px-4 align-top text-right">
+              <button onclick="openDetalleContrato('${c.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition inline-flex items-center gap-1.5" title="Ver notas y detalles">
+                <i class="fas fa-comment-alt text-slate-500"></i>
+                <span>Notas (${c.comentarios?.length || 0})</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateContractState(contratoId, newState) {
+      const user = getCurrentUser();
+      if (!user.perms.changeStatus && user.rol !== 'ADMIN') {
+        showToast('No tienes permiso para modificar estados de contrato.', 'error');
+        renderContratos();
+        return;
+      }
+
+      const contrato = appData.contratos.find(c => c.id === contratoId);
+      if (contrato) {
+        const oldLabel = getStateConfig(contrato.estado).label;
+        const newLabel = getStateConfig(newState).label;
+        contrato.estado = newState;
+        contrato.comentarios = contrato.comentarios || [];
+        contrato.comentarios.push(`[${user.nombre}] cambió el estado de "${oldLabel}" a "${newLabel}".`);
+        saveAppData();
+        renderContratos();
+        renderBadges();
+        showToast(`Estado actualizado a: ${newLabel}`, 'success');
+      }
+    }
+
+    // 7. RENDER CLIENTES
+    function renderClientes() {
+      const visibleClientes = getVisibleClientes();
+      const tbody = document.getElementById('clientes-table-body');
+
+      if (visibleClientes.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-slate-500 text-sm">
+              No hay clientes visibles para este usuario. Crea un nuevo cliente para comenzar.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = visibleClientes.map(cli => {
+        const comercial = getUserById(cli.comercialId);
+        const countContratos = appData.contratos.filter(c => c.clienteId === cli.id).length;
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900">${cli.nombre}</div>
+              <div class="text-xs text-slate-400">${cli.email || 'Sin correo'}</div>
+            </td>
+            <td class="py-3.5 px-4 font-mono text-xs font-semibold text-slate-700">${cli.nif}</td>
+            <td class="py-3.5 px-4 text-xs text-slate-700 font-medium">
+              <i class="fas fa-phone-alt text-slate-400 mr-1.5"></i>${cli.telefono}
+            </td>
+            <td class="py-3.5 px-4 text-xs text-slate-600">${cli.direccion}</td>
+            <td class="py-3.5 px-4 text-xs font-semibold text-slate-700">${comercial.nombre}</td>
+            <td class="py-3.5 px-4 text-right">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
+                ${countContratos} contrato(s)
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 8. RENDER EQUIPOS, JERARQUÍAS Y PERMISOS
+    function renderEquipos() {
+      const grid = document.getElementById('equipos-cards-grid');
+      grid.innerHTML = appData.equipos.map(eq => {
+        const members = appData.usuarios.filter(u => u.equipoId === eq.id);
+        const jefes = members.filter(u => u.rol === 'JEFE_EQUIPO' || u.rol === 'ADMIN');
+        const comerciales = members.filter(u => u.rol === 'COMERCIAL');
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-sm">${eq.nombre}</h3>
+                    <p class="text-xs text-slate-500">${eq.descripcion || 'Equipo comercial'}</p>
+                  </div>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                  ${members.length} miembros
+                </span>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-2 text-xs">
+                <div>
+                  <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider block">Responsable / Jefe de Equipo</span>
+                  <span class="font-semibold text-slate-800">
+                    ${jefes.length ? jefes.map(j => j.nombre).join(', ') : 'Sin jefe asignado'}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider block">Comerciales</span>
+                  <span class="text-slate-600">
+                    ${comerciales.length ? comerciales.map(c => c.nombre).join(', ') : 'Ningún comercial aún'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const tbody = document.getElementById('usuarios-permissions-body');
+      tbody.innerHTML = appData.usuarios.map(u => {
+        const teamOptions = appData.equipos.map(eq =>
+          `<option value="${eq.id}" ${eq.id === u.equipoId ? 'selected' : ''}>${eq.nombre}</option>`
+        ).join('');
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900 text-xs">${u.nombre}</div>
+              <div class="text-[11px] text-slate-400">${u.email}</div>
+            </td>
+            <td class="py-3.5 px-4">
+              <select onchange="updateUserField('${u.id}', 'rol', this.value)" class="text-xs font-semibold rounded-lg border border-slate-200 px-2.5 py-1.5 bg-white">
+                <option value="ADMIN" ${u.rol === 'ADMIN' ? 'selected' : ''}>Administrador General</option>
+                <option value="JEFE_EQUIPO" ${u.rol === 'JEFE_EQUIPO' ? 'selected' : ''}>Jefe de Equipo</option>
+                <option value="COMERCIAL" ${u.rol === 'COMERCIAL' ? 'selected' : ''}>Comercial</option>
+              </select>
+            </td>
+            <td class="py-3.5 px-4">
+              <select onchange="updateUserField('${u.id}', 'equipoId', this.value)" class="text-xs font-medium rounded-lg border border-slate-200 px-2.5 py-1.5 bg-white">
+                ${teamOptions}
+              </select>
+            </td>
+            <td class="py-3.5 px-4">
+              <select onchange="updateUserField('${u.id}', 'scope', this.value)" class="text-xs font-bold rounded-lg border border-blue-200 bg-blue-50/70 text-blue-900 px-2.5 py-1.5">
+                <option value="OWN" ${u.scope === 'OWN' ? 'selected' : ''}>Solo lo suyo (Propio)</option>
+                <option value="TEAM" ${u.scope === 'TEAM' ? 'selected' : ''}>Todo su Equipo</option>
+                <option value="ALL" ${u.scope === 'ALL' ? 'selected' : ''}>Toda la Empresa (Global)</option>
+              </select>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" ${u.perms.changeStatus ? 'checked' : ''} onchange="updateUserPerm('${u.id}', 'changeStatus', this.checked)" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 cursor-pointer">
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" ${u.perms.createClient ? 'checked' : ''} onchange="updateUserPerm('${u.id}', 'createClient', this.checked)" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 cursor-pointer">
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" ${u.perms.manageTeams ? 'checked' : ''} onchange="updateUserPerm('${u.id}', 'manageTeams', this.checked)" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 cursor-pointer">
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateUserField(userId, field, value) {
+      const user = appData.usuarios.find(u => u.id === userId);
+      if (user) {
+        user[field] = value;
+        saveAppData();
+        renderAll();
+        showToast('Jerarquía / visibilidad actualizada', 'success');
+      }
+    }
+
+    function updateUserPerm(userId, permKey, value) {
+      const user = appData.usuarios.find(u => u.id === userId);
+      if (user) {
+        user.perms[permKey] = value;
+        saveAppData();
+        renderAll();
+        showToast('Permiso actualizado correctamente', 'success');
+      }
+    }
+
+    // 9. MODALES Y FORMULARIOS
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+
+    function openContratoModal() {
+      const user = getCurrentUser();
+      const visibleClientes = getVisibleClientes();
+
+      const cliSelect = document.getElementById('contrato-cliente-id');
+      if (visibleClientes.length > 0) {
+        cliSelect.innerHTML = visibleClientes.map(c => `<option value="${c.id}">${c.nombre} (${c.nif})</option>`).join('');
+        quickClientMode = false;
+        document.getElementById('existing-client-selector').classList.remove('hidden');
+        document.getElementById('quick-client-fields').classList.add('hidden');
+        document.getElementById('btn-toggle-quick-client').textContent = '+ Crear cliente nuevo aquí';
+      } else {
+        quickClientMode = true;
+        document.getElementById('existing-client-selector').classList.add('hidden');
+        document.getElementById('quick-client-fields').classList.remove('hidden');
+        document.getElementById('quick-client-fields').classList.add('grid');
+        document.getElementById('btn-toggle-quick-client').textContent = 'Seleccionar existente';
+      }
+
+      const stSelect = document.getElementById('contrato-estado');
+      stSelect.innerHTML = CONTRACT_STATES.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+
+      const comSelect = document.getElementById('contrato-comercial-id');
+      let allowedUsers = appData.usuarios;
+      if (user.scope === 'OWN') allowedUsers = [user];
+      if (user.scope === 'TEAM') allowedUsers = appData.usuarios.filter(u => u.equipoId === user.equipoId);
+
+      comSelect.innerHTML = allowedUsers.map(u => `<option value="${u.id}" ${u.id === user.id ? 'selected' : ''}>${u.nombre}</option>`).join('');
+
+      document.getElementById('form-contrato').reset();
+      document.getElementById('doc-dni').checked = true;
+      document.getElementById('doc-factura').checked = true;
+      openModal('modal-contrato');
+    }
+
+    function toggleQuickClientFields() {
+      quickClientMode = !quickClientMode;
+      const existingDiv = document.getElementById('existing-client-selector');
+      const quickDiv = document.getElementById('quick-client-fields');
+      const btn = document.getElementById('btn-toggle-quick-client');
+
+      if (quickClientMode) {
+        existingDiv.classList.add('hidden');
+        quickDiv.classList.remove('hidden');
+        quickDiv.classList.add('grid');
+        btn.textContent = 'Elegir cliente ya registrado';
+      } else {
+        existingDiv.classList.remove('hidden');
+        quickDiv.classList.add('hidden');
+        quickDiv.classList.remove('grid');
+        btn.textContent = '+ Crear cliente nuevo aquí';
+      }
+    }
+
+    function handleSaveContrato(e) {
+      e.preventDefault();
+      const comercialId = document.getElementById('contrato-comercial-id').value;
+      let clienteId = document.getElementById('contrato-cliente-id').value;
+
+      if (quickClientMode) {
+        const nombre = document.getElementById('quick-cliente-nombre').value.trim();
+        const nif = document.getElementById('quick-cliente-nif').value.trim().toUpperCase();
+        const telefono = document.getElementById('quick-cliente-telefono').value.trim();
+        const direccion = document.getElementById('quick-cliente-direccion').value.trim() || 'Dirección pendiente';
+
+        if (!nombre || !nif || !telefono) {
+          showToast('Completa Nombre, NIF y Teléfono del nuevo cliente.', 'error');
+          return;
+        }
+
+        const newCliente = {
+          id: 'cli-' + Date.now(),
+          nombre,
+          nif,
+          telefono,
+          email: '',
+          direccion,
+          comercialId
+        };
+        appData.clientes.unshift(newCliente);
+        clienteId = newCliente.id;
+      }
+
+      const cups = document.getElementById('contrato-cups').value.trim().toUpperCase();
+      const tarifa = document.getElementById('contrato-tarifa').value;
+      const estado = document.getElementById('contrato-estado').value;
+      const comentarioInicial = document.getElementById('contrato-comentario').value.trim();
+
+      const nextNum = 1001 + appData.contratos.length;
+      const newContrato = {
+        id: `CTR-${nextNum}`,
+        clienteId,
+        cups,
+        tarifa,
+        estado,
+        comercialId,
+        fecha: new Date().toISOString().split('T')[0],
+        docs: {
+          dni: document.getElementById('doc-dni').checked,
+          factura: document.getElementById('doc-factura').checked,
+          contrato: document.getElementById('doc-contrato').checked
+        },
+        comentarios: comentarioInicial
+          ? [`[${getCurrentUser().nombre}]: ${comentarioInicial}`]
+          : [`Contrato cargado por ${getCurrentUser().nombre}.`]
+      };
+
+      appData.contratos.unshift(newContrato);
+      saveAppData();
+      closeModal('modal-contrato');
+      renderAll();
+      showToast(`Contrato ${newContrato.id} cargado correctamente`, 'success');
+    }
+
+    function openClienteModal() {
+      const user = getCurrentUser();
+      if (!user.perms.createClient && user.rol !== 'ADMIN') {
+        showToast('No tienes permisos para crear clientes.', 'error');
+        return;
+      }
+
+      const comSelect = document.getElementById('cliente-comercial-id');
+      let allowedUsers = appData.usuarios;
+      if (user.scope === 'OWN') allowedUsers = [user];
+      if (user.scope === 'TEAM') allowedUsers = appData.usuarios.filter(u => u.equipoId === user.equipoId);
+
+      comSelect.innerHTML = allowedUsers.map(u => `<option value="${u.id}" ${u.id === user.id ? 'selected' : ''}>${u.nombre}</option>`).join('');
+      document.getElementById('form-cliente').reset();
+      openModal('modal-cliente');
+    }
+
+    function handleSaveCliente(e) {
+      e.preventDefault();
+      const newCliente = {
+        id: 'cli-' + Date.now(),
+        nombre: document.getElementById('cliente-nombre').value.trim(),
+        nif: document.getElementById('cliente-nif').value.trim().toUpperCase(),
+        telefono: document.getElementById('cliente-telefono').value.trim(),
+        email: document.getElementById('cliente-email').value.trim(),
+        direccion: document.getElementById('cliente-direccion').value.trim(),
+        comercialId: document.getElementById('cliente-comercial-id').value
+      };
+
+      appData.clientes.unshift(newCliente);
+      saveAppData();
+      closeModal('modal-cliente');
+      renderAll();
+      showToast(`Cliente "${newCliente.nombre}" registrado`, 'success');
+    }
+
+    function openEquipoModal() {
+      document.getElementById('equipo-nombre').value = '';
+      document.getElementById('equipo-descripcion').value = '';
+      openModal('modal-equipo');
+    }
+
+    function handleSaveEquipo(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('equipo-nombre').value.trim();
+      const descripcion = document.getElementById('equipo-descripcion').value.trim();
+
+      appData.equipos.push({
+        id: 'eq-' + Date.now(),
+        nombre,
+        descripcion
+      });
+
+      saveAppData();
+      closeModal('modal-equipo');
+      renderEquipos();
+      showToast(`Equipo "${nombre}" creado`, 'success');
+    }
+
+    function openUsuarioModal() {
+      const eqSelect = document.getElementById('usuario-equipo-id');
+      eqSelect.innerHTML = appData.equipos.map(eq => `<option value="${eq.id}">${eq.nombre}</option>`).join('');
+      document.getElementById('usuario-nombre').value = '';
+      document.getElementById('usuario-email').value = '';
+      document.getElementById('usuario-rol').value = 'COMERCIAL';
+      document.getElementById('usuario-scope').value = 'OWN';
+      openModal('modal-usuario');
+    }
+
+    function autoSelectScopeByRole() {
+      const rol = document.getElementById('usuario-rol').value;
+      const scopeSelect = document.getElementById('usuario-scope');
+      if (rol === 'ADMIN') scopeSelect.value = 'ALL';
+      if (rol === 'JEFE_EQUIPO') scopeSelect.value = 'TEAM';
+      if (rol === 'COMERCIAL') scopeSelect.value = 'OWN';
+    }
+
+    function handleSaveUsuario(e) {
+      e.preventDefault();
+      const rol = document.getElementById('usuario-rol').value;
+      const newUser = {
+        id: 'usr-' + Date.now(),
+        nombre: document.getElementById('usuario-nombre').value.trim(),
+        email: document.getElementById('usuario-email').value.trim(),
+        rol,
+        equipoId: document.getElementById('usuario-equipo-id').value,
+        scope: document.getElementById('usuario-scope').value,
+        perms: {
+          changeStatus: true,
+          createClient: true,
+          manageTeams: rol === 'ADMIN'
+        }
+      };
+
+      appData.usuarios.push(newUser);
+      saveAppData();
+      closeModal('modal-usuario');
+      renderAll();
+      showToast(`Usuario "${newUser.nombre}" añadido a la jerarquía`, 'success');
+    }
+
+    // 10. DETALLE Y COMENTARIOS DE CONTRATO
+    function openDetalleContrato(contratoId) {
+      const c = appData.contratos.find(item => item.id === contratoId);
+      if (!c) return;
+
+      const cliente = getClienteById(c.clienteId);
+      const comercial = getUserById(c.comercialId);
+      const st = getStateConfig(c.estado);
+
+      document.getElementById('detalle-contrato-id').value = c.id;
+      document.getElementById('detalle-ref').textContent = `${c.id} · ${c.fecha}`;
+      document.getElementById('detalle-cliente').textContent = cliente.nombre;
+      document.getElementById('detalle-cups').textContent = c.cups;
+      document.getElementById('detalle-tarifa').textContent = c.tarifa;
+      document.getElementById('detalle-comercial').textContent = comercial.nombre;
+      document.getElementById('detalle-estado').textContent = st.label;
+
+      renderComentariosList(c);
+      openModal('modal-detalle-contrato');
+    }
+
+    function renderComentariosList(contrato) {
+      const container = document.getElementById('detalle-comentarios-list');
+      const notes = contrato.comentarios || [];
+      if (notes.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 italic">No hay notas registradas aún.</p>';
+        return;
+      }
+      container.innerHTML = notes.map(n => `
+        <div class="bg-white p-2.5 rounded-lg border border-slate-100 shadow-2xs">
+          ${n}
+        </div>
+      `).join('');
+    }
+
+    function handleAddComentario(e) {
+      e.preventDefault();
+      const id = document.getElementById('detalle-contrato-id').value;
+      const input = document.getElementById('nuevo-comentario-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const contrato = appData.contratos.find(c => c.id === id);
+      if (contrato) {
+        contrato.comentarios = contrato.comentarios || [];
+        contrato.comentarios.push(`[${getCurrentUser().nombre}]: ${text}`);
+        saveAppData();
+        input.value = '';
+        renderComentariosList(contrato);
+        renderContratos();
+        showToast('Nota añadida al contrato', 'success');
+      }
+    }
+
+    // 11. TOAST NOTIFICATIONS
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        success: 'bg-[#0b1329] text-white border-blue-500',
+        error: 'bg-rose-600 text-white border-rose-800',
+        info: 'bg-[#0b1329] text-white border-sky-400'
+      };
+      const icons = {
+        success: 'fa-check-circle text-sky-400',
+        error: 'fa-exclamation-circle text-white',
+        info: 'fa-user-shield text-sky-400'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border-l-4 text-xs font-semibold transition-all duration-300 ${colors[type]}`;
+      toast.innerHTML = `<i class="fas ${icons[type]} text-sm"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Initialize App on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      navigate('dashboard');
+    });
+  </script>
+<script>
+    const SUPABASE_URL = 'https://ughatbtpnkrrgcfalahz.supabase.co/rest/v1/'; 
+    const SUPABASE_ANON_KEY = 'sb_secret_xih6o9k4qXSzg5MKrqzz3Q_cc7gdaiG'; 
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ... resto del código de login ...
+</script>
+</body>
+</html>
